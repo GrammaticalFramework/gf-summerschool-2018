@@ -1,16 +1,7 @@
-resource MiniSyntaxEng =
-  MiniGrammarEng [
-    -- Structural words
-    Conj, and_Conj, or_Conj,
-    Det, every_Det, a_Det, aPl_Det, the_Det, thePl_Det,
-    Prep, in_Prep, on_Prep, with_Prep,
-    Pron, i_Pron, youSg_Pron, he_Pron, she_Pron,
-          we_Pron, youPl_Pron, they_Pron,
-    V2, have_V2,
-    -- other categories
-    Utt, Imp, Cl, QCl, QS, VP, CN, NP, AP, Adv, PN, Pol, Temp
-  ]
-  ** open MiniGrammarEng in {
+incomplete resource MiniSyntax =
+  open MiniGrammar
+
+in {
 
 oper
 
