@@ -1,9 +1,7 @@
---# -path=.:../resource
-
 concrete DoctorEng of Doctor =
   open
-    MiniSyntaxEng,
-    MiniParadigmsEng
+    SyntaxEng,
+    ParadigmsEng
   in {
 
 lincat
@@ -93,7 +91,7 @@ lin
   drugsSubstance = mkNP aPl_Det (mkN "drug") ;
 
 oper
-  pAdv : Str -> Adv = MiniParadigmsEng.mkAdv ;
+  pAdv : Str -> Adv = ParadigmsEng.mkAdv ;
 
   go_V = mkV "go" "went" "gone" ;
   stay_V = mkV "stay" ;
