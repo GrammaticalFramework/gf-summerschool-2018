@@ -2,6 +2,7 @@ abstract MiniGrammar = {
 
 -- collected from GF/lib/src/abstract/*.gf
 -- the functions marked ---s are shortcuts
+-- the leading comments, e.g. "-- Common", indicate the standard RGL module
 
   cat
   
@@ -37,16 +38,14 @@ abstract MiniGrammar = {
     UttQS     : QS -> Utt ;         -- does John walk
     UttNP     : NP -> Utt ;         -- John
     UttAdv    : Adv -> Utt ;        -- in the house
-    UttImpSg  : Pol -> Imp -> Utt ; -- (don't) walk ----s
+    UttImpSg  : Pol -> Imp -> Utt ; -- (do not) walk ----s
 
 -- Sentence
     UseCl     : Temp -> Pol -> Cl   -> S ;  -- John has not walked
     UseQCl    : Temp -> Pol -> QCl  -> QS ; -- has John walked
     QuestCl   : Cl -> QCl ;                 -- does John (not) walk
     PredVP    : NP -> VP -> Cl ;            -- John walks / John does not walk
-
--- Imperative
-    ImpVP     : VP -> Imp ;  -- walk
+    ImpVP     : VP -> Imp ;                 -- walk / do not walk
 
 -- Verb
     UseV      : V   -> VP ;             -- sleep
@@ -77,13 +76,11 @@ abstract MiniGrammar = {
 -- Conjunction
     CoordS    : Conj -> S -> S -> S ;   -- he walks and she runs ---s
 
--- Polarity
+-- Tense
     PPos      : Pol ;                   -- I sleep  [positive polarity]
     PNeg      : Pol ;                   -- I do not sleep [negative polarity]
-
--- Tense
-    TSim      : Temp ;                  -- simultanous: sleeps ---s
-    TAnt      : Temp ;                  -- anterior: has slept ---s
+    TSim      : Temp ;                  -- simultanous: she sleeps ---s
+    TAnt      : Temp ;                  -- anterior: she has slept ---s
 
 -- Structural
     and_Conj  : Conj ;

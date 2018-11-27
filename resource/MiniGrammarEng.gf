@@ -3,13 +3,16 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
 
   lincat
     Utt = {s : Str} ;
-    Pol  = {s : Str ; isTrue : Bool} ;
+    Pol  = {s : Str ; isTrue : Bool} ; -- the s field is empty, but needed for parsing
     Temp = {s : Str ; isPres : Bool} ;
     
     S  = {s : Str} ;
     QS = {s : Str} ;
-    Cl  = {subj : Str ; verb : Bool => Bool => {fin,inf : Str} ; compl : Str} ;
-    QCl = {subj : Str ; verb : Bool => Bool => {fin,inf : Str} ; compl : Str} ;
+    Cl, QCl = {   -- word order is fixed in S and QS
+      subj : Str ;                             -- subject
+      verb : Bool => Bool => {fin,inf : Str} ; -- dep. on Pol,Temp, e.g. "does","sleep"
+      compl : Str                              -- after verb: complement, adverbs
+      } ;
     Imp = {s : Bool => Str} ;
     VP = {verb : GVerb ; compl : Str} ;
     AP = Adjective ;
@@ -29,68 +32,83 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
   lin
     UttS s = s ;
     UttQS s = s ;
-    UttNP np = {s = np.s ! Acc} ;
+    UttNP np = {s = np.s ! Acc} ; -- Acc: produce "me" rather than "I"
     UttAdv adv = adv ;
     UttImpSg pol imp = {s = pol.s ++ imp.s ! pol.isTrue} ;
 
     UseCl temp pol cl =
-      let clt = cl.verb ! pol.isTrue ! temp.isPres
+      let clt = cl.verb ! pol.isTrue ! temp.isPres  -- isTrue regulates if "do" is used
       in {
-        s = cl.subj ++ clt.fin ++ negation pol.isTrue ++ pol.s ++ temp.s ++ clt.inf ++ cl.compl
+        s = pol.s ++ temp.s ++    --- needed for parsing: a hack
+	    cl.subj ++               -- she
+	    clt.fin ++               -- does
+	    negation pol.isTrue ++   -- not
+	    clt.inf ++               -- drink
+	    cl.compl                 -- beer
       } ;
       
     UseQCl temp pol cl =
-      let clt = cl.verb ! False ! temp.isPres
+      let clt = cl.verb ! False ! temp.isPres      -- False means that "do" is always used
       in {
-        s = clt.fin ++ cl.subj ++ negation pol.isTrue ++ pol.s ++ temp.s ++ clt.inf ++ cl.compl
+        s = pol.s ++ temp.s ++
+	    clt.fin ++               -- does
+	    cl.subj ++               -- she
+	    negation pol.isTrue ++   -- not
+	    clt.inf ++               -- drink
+	    cl.compl                 -- beer
       } ;
 
-    QuestCl cl = cl ;
+    QuestCl cl = cl ; -- since the parts are the same, we don't need to change anything
 
     PredVP np vp = {
       subj = np.s ! Nom ;
       compl = vp.compl ;
       verb = \\plain,isPres => case <vp.verb.isAux, plain, isPres, np.a> of {
 
-        -- non-auxiliary verbs, negative/question present
+        -- non-auxiliary verbs, negative/question present: "does (not) drink" 
         <False,False,True,Agr Sg Per3> => {fin = "does" ; inf = vp.verb.s ! VF Inf} ;
         <False,False,True,_          > => {fin = "do"   ; inf = vp.verb.s ! VF Inf} ;
 	
-        -- non-auxiliary, plain present ; auxiliary, all present
+        -- non-auxiliary, plain present ; auxiliary, all present: "drinks", "is (not)"
         <_,    _,   True, Agr Sg Per1> => {fin = vp.verb.s ! PresSg1    ; inf = []} ;
         <_,    _,   True, Agr Sg Per3> => {fin = vp.verb.s ! VF PresSg3 ; inf = []} ;
         <_,    _,   True, _>           => {fin = vp.verb.s ! PresPl     ; inf = []} ;
 
-        -- all verbs, past
+        -- all verbs, past: "has (not) drunk", "has (not) been"
         <_,   _,    False,Agr Sg Per3> => {fin = "has"  ; inf = vp.verb.s ! VF PastPart} ;
         <_,   _,    False,_          > => {fin = "have" ; inf = vp.verb.s ! VF PastPart} 
 
+        -- the negation word "not" is put in place in UseCl, UseQCl
       }
     } ;
 
     ImpVP vp = {
       s = table {
-        True  => vp.verb.s ! VF Inf ++ vp.compl ;
+        True  => vp.verb.s ! VF Inf ++ vp.compl ;    -- in Eng, imperative = infinitive
         False => "do not" ++ vp.verb.s ! VF Inf ++ vp.compl
         }
       } ;
 
     UseV v = {
-      verb = verb2gverb v ;
+      verb = verb2gverb v ;  -- lift ordinary verbs to generalized verbs
       compl = []
       } ;
+      
     ComplV2 v2 np = {
       verb = verb2gverb v2 ;
-      compl = v2.c ++ np.s ! Acc
+      compl = v2.c ++ np.s ! Acc  -- NP object in the accusative, preposition first
       } ;
+      
     UseAP ap = {
-      verb = be_GVerb ;
+      verb = be_GVerb ;     -- the verb is the copula "be"
       compl = ap.s
       } ;
+      
     UseNP np = {
       verb = be_GVerb ;
-      compl = np.s ! Nom
+      compl = np.s ! Nom    -- NP complement is in the nominative
       } ;
+      
     UseAdv adv = {
       verb = be_GVerb ;
       compl = adv.s
@@ -101,24 +119,28 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
       
     DetCN det cn = {
       s = table {c => det.s ++ cn.s ! det.n} ;
-      a = Agr det.n Per3
+      a = Agr det.n Per3   -- this kind of NP is always third person
       } ;
+      
     UsePN pn = {
       s = \\_ => pn.s ;
       a = Agr Sg Per3
       } ;
-    UsePron p =
-      p ;
+      
+    UsePron p = p ;  -- Pron is worst-case NP  
+      
     MassNP cn = {
       s = \\_ => cn.s ! Sg ;
       a = Agr Sg Per3
       } ;
-    a_Det = {s = "a" ; n = Sg} ;
+      
+    a_Det = {s = pre {"a"|"e"|"i"|"o" => "an" ; _ => "a"} ; n = Sg} ; --- a/an can get wrong
     aPl_Det = {s = "" ; n = Pl} ;
     the_Det = {s = "the" ; n = Sg} ;
     thePl_Det = {s = "the" ; n = Pl} ;
-    UseN n =
-      n ;
+    
+    UseN n = n ;
+    
     AdjCN ap cn = {
       s = table {n => ap.s ++ cn.s ! n}
       } ;
