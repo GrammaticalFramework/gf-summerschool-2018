@@ -56,6 +56,8 @@ fun
   eatAction       : Action ;
   drinkAction     : Action ;
   smokeAction     : Action ;
+  measureTemperatureAction   : Action ;
+  measureBloodPressureAction : Action ;
 
   hospitalPlace : Place ;
   homePlace     : Place ;

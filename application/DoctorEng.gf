@@ -1,10 +1,15 @@
 --# -path=.:../resource
 
+-- model implementation using Mini RGL
+
 concrete DoctorEng of Doctor =
   open
     MiniSyntaxEng,
     MiniParadigmsEng
   in {
+
+-------------------
+-- the first part could be a functor
 
 lincat
   Phrase = Utt ;
@@ -51,7 +56,8 @@ lin
   examineAction person = mkVP examine_V2 person ;
   takeSubstancAction substance = mkVP take_V2 substance ;
 
--- end of functor
+-- end of what could be a functor
+--------------------------------
 
   coughAction = mkVP (mkV "cough") ;
   breatheAction = mkVP (mkV "breathe") ;
@@ -61,8 +67,10 @@ lin
   dressAction = mkVP (mkVP put_V2 (mkNP thePl_Det (mkN "clothe"))) (pAdv "on") ;
   eatAction = mkVP (mkV "eat" "ate" "eaten") ;
   drinkAction = mkVP (mkV "drink" "drank" "drunk") ;
-  smokeAction = mkVP (mkV "eat" "ate" "eaten") ;
-
+  smokeAction = mkVP (mkV "smoke") ;
+  measureTemperatureAction = mkVP (mkV2 (mkV "measure")) (mkNP the_Det (mkN "body temperature")) ;
+  measureBloodPressureAction = mkVP (mkV2 (mkV "measure")) (mkNP the_Det (mkN "blood pressure")) ;
+  
   hospitalPlace = {at = pAdv "at the hospital" ; to = pAdv "to the hospital"} ;
   homePlace = {at = pAdv "at home" ; to = pAdv "home"} ;
   schoolPlace = {at = pAdv "at school" ; to = pAdv "to school"} ;

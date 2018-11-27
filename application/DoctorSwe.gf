@@ -1,8 +1,14 @@
-concrete DoctorEng of Doctor =
+-- model implementation using standard RGL
+
+concrete DoctorSwe of Doctor =
   open
-    SyntaxEng,
-    ParadigmsEng
+    SyntaxSwe,
+    ParadigmsSwe
   in {
+
+-------------------
+-- the first part could be a functor
+-- exception in Swe: isProfessionProperty, no article: "I am a doctor - jag är läkare"
 
 lincat
   Phrase = Utt ;
@@ -29,7 +35,7 @@ lin
   actionFact person action = mkCl person action ;
   propertyFact person property = mkCl person property ;
   
-  isProfessionProperty profession = mkVP (mkNP a_Det profession) ;
+  isProfessionProperty profession = mkVP (mkNP profession) ; -- the only difference from Eng
   needProfessionProperty profession = mkVP need_V2 (mkNP a_Det profession) ;
   isAtPlaceProperty place = mkVP place.at ;
   haveIllnessProperty illness = mkVP have_V2 illness ;
@@ -51,54 +57,56 @@ lin
 
 -- end of functor
 
-  coughAction = mkVP (mkV "cough") ;
-  breatheAction = mkVP (mkV "breathe") ;
-  vomitAction = mkVP (mkV "vomit") ;
-  sleepAction = mkVP (mkV "sleep" "slept" "slept") ;
-  undressAction = mkVP (mkVP take_V2 (mkNP thePl_Det (mkN "clothe"))) (pAdv "off") ;
-  dressAction = mkVP (mkVP put_V2 (mkNP thePl_Det (mkN "clothe"))) (pAdv "on") ;
-  eatAction = mkVP (mkV "eat" "ate" "eaten") ;
-  drinkAction = mkVP (mkV "drink" "drank" "drunk") ;
-  smokeAction = mkVP (mkV "eat" "ate" "eaten") ;
+  coughAction = mkVP (mkV "hosta") ;
+  breatheAction = mkVP (depV (mkV "anda")) ;
+  vomitAction = mkVP (depV (mkV "kräker")) ;
+  sleepAction = mkVP (mkV "sova" "sov" "sovit") ;
+  undressAction = mkVP (mkVP take_V2 (mkNP thePl_Det (mkN "kläd" "kläder"))) (pAdv "av") ;
+  dressAction = mkVP (mkVP put_V2 (mkNP thePl_Det (mkN "kläd" "kläder"))) (pAdv "på") ;
+  eatAction = mkVP (mkV "äta" "åt" "ätit") ;
+  drinkAction = mkVP (mkV "dricka" "drack" "druckit") ;
+  smokeAction = mkVP (mkV "röker") ;
+  measureTemperatureAction = mkVP take_V2 (mkNP the_Det (mkN "temp")) ;
+  measureBloodPressureAction = mkVP (mkV2 (mkV "mäter")) (mkNP the_Det (mkN "blotryck" neutrum)) ;
 
-  hospitalPlace = {at = pAdv "at the hospital" ; to = pAdv "to the hospital"} ;
-  homePlace = {at = pAdv "at home" ; to = pAdv "home"} ;
-  schoolPlace = {at = pAdv "at school" ; to = pAdv "to school"} ;
-  workPlace = {at = pAdv "at work" ; to = pAdv "to work"} ;
+  hospitalPlace = {at = pAdv "på sjukhuset" ; to = pAdv "till sjukhuset"} ;
+  homePlace = {at = pAdv "hemma" ; to = pAdv "hem"} ;
+  schoolPlace = {at = pAdv "i skolan" ; to = pAdv "till skolan"} ;
+  workPlace = {at = pAdv "på jobbet" ; to = pAdv "till jobbet"} ;
 
-  doctorProfession = mkCN (mkN "doctor") ;
-  nurseProfession = mkCN (mkN "nurse") ;
-  interpreterProfession = mkCN (mkN "interpreter") ;
+  doctorProfession = mkCN (mkN "läkare" "läkare") ;
+  nurseProfession = mkCN (mkN "sjuksköterska") ;
+  interpreterProfession = mkCN (mkN "tolk") ;
 
-  bePregnantProperty = mkVP (mkA "pregnant") ;
-  beIllProperty = mkVP (mkA "ill") ;
-  beWellProperty = mkVP (mkA "well") ;
-  beDeadProperty = mkVP (mkA "dead") ;
-  haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergy")) ;
-  havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "pain")) ;
-  haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "child" "children")) ;
+  bePregnantProperty = mkVP (mkA "gravid") ;
+  beIllProperty = mkVP (mkA "sjuk") ;
+  beWellProperty = mkVP (mkA "frisk") ;
+  beDeadProperty = mkVP (mkA "död") ;
+  haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergi" "allergier")) ;
+  havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "smärta")) ;
+  haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "barn" "barn")) ;
   
-  feverIllness = mkNP a_Det (mkN "fever") ;
-  fluIllness = mkNP a_Det (mkN "flu") ;
-  headacheIllness = mkNP a_Det (mkN "headache") ;
-  diarrheaIllness = mkNP a_Det (mkN "diarrhea") ;
-  heartDiseaseIllness = mkNP a_Det (mkN "heart disease") ;
-  lungDiseaseIllness = mkNP a_Det (mkN "lung disease") ;
-  hypertensionIllness = mkNP (mkN "hypertension") ;
+  feverIllness = mkNP (mkN "feber") ;
+  fluIllness = mkNP a_Det (mkN "förkylning") ;
+  headacheIllness = mkNP (mkN "huvudvärk" "huvudvärkar") ;
+  diarrheaIllness = mkNP (mkN "diarré" "diarréer") ;
+  heartDiseaseIllness = mkNP aPl_Det (mkN "hjärtsjukdom") ;
+  lungDiseaseIllness = mkNP aPl_Det (mkN "lungsjukdom") ;
+  hypertensionIllness = mkNP (mkN "hypertoni") ;
 
-  alcoholSubstance = mkNP (mkN "alcohol") ;
-  medicineSubstance = mkNP a_Det (mkN "drug") ;
-  drugsSubstance = mkNP aPl_Det (mkN "drug") ;
+  alcoholSubstance = mkNP (mkN "alkohol") ;
+  medicineSubstance = mkNP aPl_Det (mkN "läkemedel" "läkemedel") ;
+  drugsSubstance = mkNP aPl_Det (mkN "drog" "droger") ;
 
 oper
-  pAdv : Str -> Adv = ParadigmsEng.mkAdv ;
+  pAdv : Str -> Adv = ParadigmsSwe.mkAdv ;
 
-  go_V = mkV "go" "went" "gone" ;
-  stay_V = mkV "stay" ;
-  need_V2 = mkV2 (mkV "need") ;
-  take_V2 = mkV2 (mkV "take" "took" "taken") ;
-  put_V2 = mkV2 (mkV "put" "put" "put") ;
-  vaccinate_V2 = mkV2 (mkV "vaccinate") ;
-  examine_V2 = mkV2 (mkV "examine") ;
+  go_V = mkV "gå" "gick" "gått" ;
+  stay_V = mkV "stanna" ;
+  need_V2 = mkV2 (mkV "behöver") ;
+  take_V2 = mkV2 (mkV "ta" "tog" "tagit") ;
+  put_V2 = mkV2 (mkV "sätta" "satte" "satt") ;
+  vaccinate_V2 = mkV2 (mkV "vaccinera") ;
+  examine_V2 = mkV2 (mkV "undersöker") ;
 
 }
