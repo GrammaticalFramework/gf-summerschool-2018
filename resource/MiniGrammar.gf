@@ -11,6 +11,7 @@ abstract MiniGrammar = {
     Temp ;   -- temporal features                   e.g. present, anterior
 
 -- Cat
+    Imp ;    -- imperative                          e.g. "walk", "don't walk"
     S ;      -- declarative sentence                e.g. "she lives here"
     QS ;     -- question sentence                   e.g. "does she live here"    
     Cl ;     -- declarative clause, with all tenses e.g. "she looks at this"
@@ -32,9 +33,11 @@ abstract MiniGrammar = {
     
   fun
 -- Phrase
-    UttS      : S  -> Utt ;
-    UttQS     : QS -> Utt ;
-    UttNP     : NP -> Utt ;
+    UttS      : S  -> Utt ;         -- John walks
+    UttQS     : QS -> Utt ;         -- does John walk
+    UttNP     : NP -> Utt ;         -- John
+    UttAdv    : Adv -> Utt ;        -- in the house
+    UttImpSg  : Pol -> Imp -> Utt ; -- (don't) walk ----s
 
 -- Sentence
     UseCl     : Temp -> Pol -> Cl   -> S ;  -- John has not walked
@@ -42,10 +45,15 @@ abstract MiniGrammar = {
     QuestCl   : Cl -> QCl ;                 -- does John (not) walk
     PredVP    : NP -> VP -> Cl ;            -- John walks / John does not walk
 
+-- Imperative
+    ImpVP     : VP -> Imp ;  -- walk
+
 -- Verb
     UseV      : V   -> VP ;             -- sleep
     ComplV2   : V2  -> NP -> VP ;       -- love it  ---s
     UseAP     : AP  -> VP ;             -- be small ---s
+    UseNP     : NP  -> VP ;             -- be a man ---s
+    UseAdv    : Adv -> VP ;             -- be in the house ---s
     AdvVP     : VP -> Adv -> VP ;       -- sleep here
 
 -- Noun
@@ -94,5 +102,6 @@ abstract MiniGrammar = {
     we_Pron    : Pron ;
     youPl_Pron : Pron ;
     they_Pron  : Pron ;
-    
+
+    have_V2 : V2 ;
 }

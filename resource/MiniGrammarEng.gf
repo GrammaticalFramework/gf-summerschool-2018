@@ -10,6 +10,7 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
     QS = {s : Str} ;
     Cl  = {subj : Str ; verb : Bool => Bool => {fin,inf : Str} ; compl : Str} ;
     QCl = {subj : Str ; verb : Bool => Bool => {fin,inf : Str} ; compl : Str} ;
+    Imp = {s : Bool => Str} ;
     VP = {verb : GVerb ; compl : Str} ;
     AP = Adjective ;
     CN = Noun ;
@@ -29,17 +30,19 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
     UttS s = s ;
     UttQS s = s ;
     UttNP np = {s = np.s ! Acc} ;
+    UttAdv adv = adv ;
+    UttImpSg pol imp = {s = pol.s ++ imp.s ! pol.isTrue} ;
 
     UseCl temp pol cl =
       let clt = cl.verb ! pol.isTrue ! temp.isPres
       in {
-        s = cl.subj ++ clt.fin ++ pol.s ++ temp.s ++ clt.inf ++ cl.compl
+        s = cl.subj ++ clt.fin ++ negation pol.isTrue ++ pol.s ++ temp.s ++ clt.inf ++ cl.compl
       } ;
       
     UseQCl temp pol cl =
       let clt = cl.verb ! False ! temp.isPres
       in {
-        s = clt.fin ++ cl.subj ++ pol.s ++ temp.s ++ clt.inf ++ cl.compl
+        s = clt.fin ++ cl.subj ++ negation pol.isTrue ++ pol.s ++ temp.s ++ clt.inf ++ cl.compl
       } ;
 
     QuestCl cl = cl ;
@@ -64,7 +67,14 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
 
       }
     } ;
-      
+
+    ImpVP vp = {
+      s = table {
+        True  => vp.verb.s ! VF Inf ++ vp.compl ;
+        False => "do not" ++ vp.verb.s ! VF Inf ++ vp.compl
+        }
+      } ;
+
     UseV v = {
       verb = verb2gverb v ;
       compl = []
@@ -77,6 +87,15 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
       verb = be_GVerb ;
       compl = ap.s
       } ;
+    UseNP np = {
+      verb = be_GVerb ;
+      compl = np.s ! Nom
+      } ;
+    UseAdv adv = {
+      verb = be_GVerb ;
+      compl = adv.s
+      } ;
+
     AdvVP vp adv =
       vp ** {compl = vp.compl ++ adv.s} ;
       
@@ -110,8 +129,8 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
 
     CoordS conj a b = {s = a.s ++ conj.s ++ b.s} ;
     
-    PPos  = {s = []    ; isTrue = True} ;
-    PNeg  = {s = "not" ; isTrue = False} ;
+    PPos  = {s = [] ; isTrue = True} ;
+    PNeg  = {s = [] ; isTrue = False} ;
 
     TSim  = {s = []    ; isPres = True} ;
     TAnt  = {s = []    ; isPres = False} ;
@@ -153,5 +172,7 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
       s = table {Nom => "they" ; Acc => "them"} ;
       a = Agr Pl Per2
       } ;
+
+    have_V2 = mkVerb "have" "has" "had" "had" "having" ** {c = []} ;
 
 }

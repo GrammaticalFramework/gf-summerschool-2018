@@ -5,7 +5,10 @@ resource MiniSyntaxEng =
     Det, every_Det, a_Det, aPl_Det, the_Det, thePl_Det,
     Prep, in_Prep, on_Prep, with_Prep,
     Pron, i_Pron, youSg_Pron, he_Pron, she_Pron,
-          we_Pron, youPl_Pron, they_Pron
+          we_Pron, youPl_Pron, they_Pron,
+    V2, have_V2,
+    -- other categories
+    Utt, Imp, Cl, QCl, QS, VP, CN, NP, AP, Adv, PN, Pol, Temp
   ]
   ** open MiniGrammarEng in {
 
@@ -18,6 +21,17 @@ oper
       = UttQS ;
     mkUtt : NP -> Utt
       = UttNP ;
+    mkUtt : Adv -> Utt
+      = UttAdv ;
+    mkUtt : Pol -> Imp -> Utt
+      = UttImpSg ;
+    mkUtt : Imp -> Utt
+      = UttImpSg PPos
+  } ;
+
+  mkImp = overload {
+    mkImp : VP -> Imp
+      = ImpVP ;
   } ;
 
   mkS = overload {
@@ -29,6 +43,8 @@ oper
       = \t -> UseCl t PPos ;
     mkS : Cl -> S
       = UseCl TSim PPos ;
+    mkS : Conj -> S -> S -> S
+      = CoordS ;
   } ;
   
   mkQS = overload {
@@ -41,6 +57,16 @@ oper
     mkQS : QCl -> QS
       = UseQCl TSim PPos ;
   } ;
+
+  positivePol : Pol
+    = PPos ;
+  negativePol : Pol
+    = PNeg ;
+
+  simultaneousAnt : Temp
+    = TSim ;
+  anteriorAnt : Temp
+    = TAnt ;
 
   mkCl = overload {
     mkCl : NP -> VP -> Cl
@@ -62,16 +88,19 @@ oper
 
   mkVP = overload {
     mkVP : V -> VP
-      = \v -> UseV v ;
+      = UseV ;
     mkVP : V2 -> NP -> VP
-      = \v,obj -> ComplV2 v obj ;
+      = ComplV2 ;
     mkVP : AP -> VP
-      = \ap -> UseAP ap ;
+      = UseAP ;
     mkVP : A -> VP
       = \a -> UseAP (PositA a) ;
+    mkVP : NP -> VP
+      = UseNP ;
+    mkVP : Adv -> VP
+      = UseAdv ;
     mkVP : VP -> Adv -> VP
       = AdvVP ;
-
   } ;
 
   mkNP = overload {
@@ -89,32 +118,34 @@ oper
       = \n -> MassNP (UseN n) ;
   } ;
 
-{-
-  mkUtt = overload {
+    i_NP : NP
+      = UsePron i_Pron ;
+    you_NP : NP
+      = UsePron youSg_Pron ;
+    he_NP : NP
+      = UsePron he_Pron ;
+    she_NP : NP
+      = UsePron she_Pron ;
 
-
+  mkCN = overload {
+    mkCN : N -> CN
+      = UseN ;
+    mkCN : AP -> CN -> CN
+      = AdjCN ;
+    mkCN : A -> N -> CN
+      = \a,n -> AdjCN (PositA a) (UseN n) ;
+    mkCN : A -> CN -> CN
+      = \a,cn -> AdjCN (PositA a) cn ;
   } ;
 
-  mkUtt = overload {
-
-
+  mkAP = overload {
+    mkAP : A -> AP
+      = PositA ;
   } ;
-
-  mkUtt = overload {
-
-
+  
+  mkAdv = overload {
+    mkAdv : Prep -> NP -> Adv
+      = PrepNP ;
   } ;
-
-  mkUtt = overload {
-
-
-  } ;
-
-  mkUtt = overload {
-
-
-  } ;
--}
-
 
 }

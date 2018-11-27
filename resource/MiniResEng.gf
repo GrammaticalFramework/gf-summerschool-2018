@@ -56,6 +56,8 @@ oper
     let verb = smartVerb inf
     in mkVerb inf (verb.s ! PresSg3) past pastpart (verb.s ! PresPart) ;   
 
+  negation : Bool -> Str = \b -> case b of {True => [] ; False => "not"} ; 
+
   Verb2 : Type = Verb ** {c : Str} ;
 
   be_GVerb : GVerb = {
