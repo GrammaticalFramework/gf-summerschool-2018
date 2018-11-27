@@ -1,4 +1,4 @@
---# -path=.:../resource
+--# -path=.:../resource/abstract:../resource/english
 
 -- model implementation using Mini RGL
 
