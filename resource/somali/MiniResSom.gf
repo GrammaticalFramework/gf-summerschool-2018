@@ -1,5 +1,19 @@
 resource MiniResSom = open Prelude, Predef in {
 
+--------------------------------------------------------------------------------
+-- Clause
+
+param
+  Tense = Simultanous | Anterior ;
+  QForm = Question | Statement ;
+
+oper
+  -- choose the right form of the verb
+  inflVerb : Tense -> Bool -> Agreement -> VP -> Str = \t,b,a,vp ->
+    vp.s ! case <t,b> of {
+             <Simultaneous,_> => VPres a b ;
+             <Anterior,True>  => VPast a ;
+             <Anterior,False> => VNegPast } ;
 
 --------------------------------------------------------------------------------
 -- Nominal morphology
@@ -14,16 +28,6 @@ param
   Inclusion = Excl | Incl ;
   Agreement = Sg1 | Sg2 | Sg3 Gender | Pl1 Inclusion | Pl2 | Pl3 | Impers ;
 
-
-
---TODO: more cases (or contracted prepositions)?, determinative (not in mini resource), …
--- Determinativt kii / tii
--- Substantivens determinativa form bildas genom att den bestämda grundformens –a eller subjektsformens –u ersätts med ändelsen –ii som anger att föremålet utgör en gemensam bekant bakgrundsinformation.
--- Den determinativa formen kan även ersätta slutvokalen i de possessiva ändelserna.
-  -- Den determinativa ändelsen –kii/–tii används när man vill framhålla att ett bestämt föremål inte bara är allmänt bestämt utan dessutom förväntas vara känt sedan tidigare för den som man talar med.
-  -- Det somaliska determinativa morfemet kii/tii har möjligen en något bredare användning, eftersom det markerat att talaren anser att lyssnare borde känna till det som substantivet refererar till.
-  -- mundul·kii·sii   -- kii is the morpheme, what is sii?
-
   NForm = Indef Number
         | Def Number Vowel -- Stems for definite and determinative suffixes
         | Numerative       -- When modified by a number (only distinct for some feminine nouns)
@@ -35,36 +39,39 @@ oper
                 _                 => Sg3 g } ;
   getNum : Agreement -> Number = \a ->
     case a of { Sg1|Sg2|Sg3 _ => Sg ; _ => Pl } ;
+  p2agr : Number -> Agreement = \n ->
+    case n of { Sg => Sg2 ; Pl => Pl2 } ;
 
   Noun : Type = {s : NForm => Str ; g : Gender} ;
 
   CNoun : Type = Noun ** { mod : Number => Case => Str ; hasMod : Bool } ;
 
-  --TODO: figure out some nice minimum number of stems
   mkNoun : (x1,_,_,x4 : Str) -> Gender -> Noun = \wiil,wiilka,wiilal,wiilasha,gender ->
-    let bisadi = case gender of
+    let -- Feminine nouns that end in consonant have a special nominative
+        bisadi = case gender of
                    { Fem  => case wiil of { _ + #c => wiil+"i" ; _ => wiil} ;
                      Masc => wiil } ;
+
+        -- Feminine nouns that end in -o in plural have a special numerative
         bisadood =  case gender of
                        { Fem  => case wiilal of { _ + "o" => wiilal+"od" ; _ => wiil} ;
                          Masc => wiil } ;
+
         defStems : Str -> Vowel => Str = \s -> case s of {
-          ilk + "aha" =>
+          ilk + "aha" => -- Vowel assimilates to the following suffix after h
                table { A => ilk+"ah" ;
                        E => ilk+"eh" ;
                        I => ilk+"ih" ;
                        O => ilk+"oh" ;
                        U => ilk+"uh"
                        } ;
-          _ => table { _ => init s }
+          _ => table { _ => init s } -- No assimilations
           } ;
 
     in { s = table {
            Indef Sg => wiil ;
            Indef Pl => wiilal ;
            IndefNom => bisadi ;
-           -- DefAbs Sg  => wiilka ;
-           -- DefAbs Pl  => wiilasha ;
            Numerative => bisadood ;
            Def Sg vow => defStems wiilka ! vow ;
            Def Pl vow => defStems wiilasha ! vow } ;
@@ -89,7 +96,7 @@ oper
                  sha = case ta of {"sha" => ta ; _ => s + ta } in
     mkNoun mas (mas + ka) (mas + "a" + s) (mas + "a" + sha) Masc ;
 
-  -- 4a) Feminine, plural with ó
+  -- 4a) Feminine, plural with o
   nUl ul = let o  = case last ul of { "i" => "yo" ; _ => "o" } ;
                u  = case last ul of { "l" => init ul ; _ => ul } ;
                sha = allomorph mTa ul in
@@ -124,7 +131,7 @@ oper
 
       -- Based on the table on page 21--TODO find generalisations in patterns
       mTa => case stem of {
-                   _ + ("dh")  => "a" ; ---- ??? just guessing from gabadh
+                   _ + ("dh")  => "a" ;
                    _ + ("d"|"c"|"h"|"x"|"q"|"'"|"i"|"y"|"w") => "da" ;
                    _ + "l" => "sha" ;
                    _       => "ta" } ;
@@ -148,18 +155,12 @@ param
 oper
 
    --TODO: make patterns actually adjusted to Somali, these are just copied from elsewhere
-   v : pattern Str = #("a" | "e" | "i" | "o" | "u") ;
-   vv : pattern Str = #("aa" | "ee" | "ii" | "oo" | "uu") ;
-   c : pattern Str = #("m" | "n" | "p" | "b" | "t" | "d" | "k" | "g" | "f" | "v" | "s" | "h" | "l" | "j" | "r" | "z" | "c" | "q" | "y" | "w") ;
-   lmnr : pattern Str = #("l" | "m" | "n" | "r") ;
-   kpt : pattern Str = #("k" | "p" | "t") ;
-   gbd : pattern Str = #("g" | "b" | "d") ;
-
-
-  -- Smart paradigm
-  --Substantiv som slutar på –o/–ad är så gott som alltid feminina, t.ex. qaáddo sked, bisád katt.
-  --Substantiv som slutar på –e är så gott som alltid maskulina, t.ex. dúbbe hammare, fúre nyckel.
-  -- För övriga ord säger ordets form dessvärre väldigt lite om ordets genus. Däremot kan betoningens plats i ordet väldigt ofta avslöja ordets genus. Man kan alltså i flesta fall höra vilket genus ett substantiv har.
+  v : pattern Str = #("a" | "e" | "i" | "o" | "u") ;
+  vv : pattern Str = #("aa" | "ee" | "ii" | "oo" | "uu") ;
+  c : pattern Str = #("m" | "n" | "p" | "b" | "t" | "d" | "k" | "g" | "f" | "v" | "s" | "h" | "l" | "j" | "r" | "z" | "c" | "q" | "y" | "w") ;
+  lmnr : pattern Str = #("l" | "m" | "n" | "r") ;
+  kpt : pattern Str = #("k" | "p" | "t") ;
+  gbd : pattern Str = #("g" | "b" | "d") ;
 
 
   mkN = overload {
@@ -168,7 +169,6 @@ oper
     mkN : (_,_ : Str) -> Gender -> Noun = nMaalin ;
     mkN : Noun -> Gender -> Noun = \n,g ->
       n ** { g = g } ;
-
   } ;
 
   mkN1 : Str -> Noun = \n -> case n of {
@@ -196,15 +196,13 @@ oper
   BaseNP : Type = {
     a : Agreement ;
     isPron : Bool ;
---    stm : Bool => Str ; -- Mostly makes a difference where in the concrete syntax tree the sentence type marker comes from
     sp : Str } ;
 
   NP : Type = BaseNP ** { s : Case => Str } ;
 
   useN : Noun -> CNoun ** BaseNP = \n -> n **
     { mod = \\_,_ => [] ; hasMod = False ;
-      a = Sg3 n.g ; isPron = False ; sp = [] ;
-      stm = stmarker (Sg3 n.g) } ;
+      a = Sg3 n.g ; isPron = False ; sp = [] } ;
 
 --------------------------------------------------------------------------------
 -- Determiners
@@ -215,35 +213,253 @@ oper
     d : NForm
     } ;
 
-  mkDet : (x1,_,x3 : Str) -> NForm -> Det = \an,kani,tani,nf ->
+  mkDet : (x1,_,x3 : Str) -> NForm -> Det = mkDetBind True ;
+
+  -- TODO: generalise better for all dets
+  mkDetBind : (bind : Bool) -> (x1,_,x3 : Str) -> NForm -> Det = \b,an,kani,tani,nf ->
     let ani : Str = case an of { _ + #c => an+"i" ;
                                  _      => case nf of { Def _ _ => "u" ;
                                                         _       => [] }
                                } ;
-        bind : Str -> Str = \x -> case x of { "" => [] ;  _ => BIND ++ x } ;
+        bind : Str -> Str = \x -> case b of {False => x ; True => BIND ++ x} ;
     in { s = table { Nom => bind ani ; Abs => bind an } ;
         sp = table { Fem => tani ; Masc => kani } ;
          d = nf
        } ;
 
+
+
 --------------------------------------------------------------------------------
--- Pronouns, prepositions
+-- Adjectives
 
--- Prepositionen u dras obligatoriskt samman med föregående pronomen
--- så att /a/ + /u/ > /oo/.
+param
+  AForm = AF Number Case ; ---- TODO: past tense
 
--- De somaliska possessiva pronomenen, precis som de svenska, har två olika genusformer i singular och en enda form i plural.
---  ägaren då det ägda föremålet är
---  m.sg. f.sg.plural
---  kayga tayda kuwayga
---  kaaga taada kuwaaga
---  kiisa tiisa kuwiisa
---  keeda teeda kuweeda
---
---  kaayaga taayada kuwayaga (1 pl. exkl.)
---  keenna teenna kuweenna (1 pl. inkl.)
---  kiinna tiinna kuwiinna
---  kooda tooda kuwooda
+oper
+
+-- Sequences of adjectives follow the rules for restrictive relatives clauses, i.e. are linked by oo 'and' on an indefinite head NP and by ee 'and' on a definite NP (8.1).
+
+ -- Komparativ
+ -- För att uttrycka motsvarigheten till svenskans komparativ placerar man på somaliska helt enkelt prepositionen ká 'från, av, än' framför adjektivet i fråga. Adjektivet får ingen ändelse.
+ -- Shan waa ay ká yar tahay siddéed. Fem är mindre än åtta.
+ -- Superlativ
+ -- Motsvarigheten till svenskans superlativ bildas med prepositionsklustret ugú som till sin betydelse närmast motsvarar svenskans allra, t.ex.
+ -- ugu horrayntii (det att komma) allra först
+
+  Adjective : Type = { s : AForm => Str } ;
+
+  mkA : Str -> Adjective = \yar ->
+    let yaryar = duplicate yar
+    in { s = table {
+           AF Sg Abs => yar ;
+           AF Pl Abs => yaryar ;
+           AF Sg Nom => yar + "i" ;
+           AF Pl Nom => yaryar + "i" }
+       } ;
+
+  duplicate : Str -> Str = \yar -> case yar of {
+    "dheer" => "dhaadheer" ;
+    "weyn"  => "waaweyn" ; -- TODO eventually handle irregular adjectives elsewhere
+    y@#c + a@#v + r@#c + _ => y + a + r + yar ;
+    g@#c + aa@#vv      + _ => g + aa + yar ; --TODO: proper patterns
+    _                      => yar + ":plural" } ;
+
+--------------------------------------------------------------------------------
+-- Verb
+
+param
+   VForm =
+     VInf
+   | VPres Agreement Bool
+   | VNegPast
+   | VPast Agreement
+   | VImp Number Bool ;
+
+-- TODO:
+-- tre aspekter (enkel, progressiv, habituell),
+-- fem modus (indikativ, imperativ, konjunktiv, kontiditonalis, optativ)
+
+oper
+
+
+  Verb : Type = { s : VForm => Str } ;
+
+  Verb2 : Type = Verb ** { c2 : Preposition } ;
+
+  mkVerb : (imperative,p2pl,p1sg : Str) -> Verb = \qaado,ark,qaat ->
+    let stems : {p1 : Str ; p2 : Str} = case ark of {
+          a + r@#c + k@#c -- two consonants need a vowel in between
+            => <ark + "i", a + r + a + voiced k> ;
+          yar + "ee"  -- double e turns into ey
+            => <ark + "n", yar + "ey"> ;
+          _ => <ark + "n", ark> -- no changes, just add n for infinitive
+        } ;
+        arki = stems.p1 ;
+        arag = stems.p2 ;
+        arkin = case last arki of { -- The negative past tense ends in n:
+                  "n" => arki ;         -- if infinitive ends in n, no change;
+                   _  => arki + "n" } ; -- otherwise add n.
+
+        -- Some predictable sound changes
+        t : Str = case arag of {
+               _ + ("i"|"y") => "s" ; -- t changes into s in front of i/y:
+               _             => "t" } ; -- kari+seen, (sug|joogsa|qaada)+teen
+        ay : Str = case ark of {
+               _ + ("i"|"e") => "ey" ;
+               _             => "ay" } ;
+        n : Str = case arag of {
+               _ + #v => "nn" ; -- n duplicates after vowel
+               _      => "n" } ;
+        an : Str = case qaado of {
+               _ + "o" => "an" ; -- Allomorph for imperatives
+               _       => "in" } ;
+   in { s = table {
+          VPres (Sg1|Sg3 Masc|Impers) pol
+                        => qaat + if_then_Str pol "aa" "o" ;
+          VPres (Sg2|Sg3 Fem) pol
+                        => arag + t + if_then_Str pol "aa" "o" ;
+          VPres (Pl1 _) pol
+                        => arag + n + if_then_Str pol "aa" "o"  ;
+          VPres Pl2 pol => arag + t + "aan" ;
+          VPres Pl3 pol => qaat + "aan" ;
+
+          VPast (Sg1|Sg3 Masc|Impers)
+                        => qaat + ay ;
+          VPast (Sg2|Sg3 Fem)
+                        => arag + t + ay ;
+          VPast (Pl1 _) => arag + n + ay ;
+          VPast Pl2     => arag + t + "een" ;
+          VPast Pl3     => qaat + "een" ;
+
+          VImp Sg True     => qaado ;
+          VImp Pl True     => qaat + "a" ;
+          VImp Sg False    => arag + an ;
+          VImp Pl False    => qaat + "ina" ;
+
+          VInf             => arki ;
+          VNegPast         => arkin }
+      } ;
+
+-------------------------
+-- Regular verb paradigms
+
+  cSug, cKari, cYaree, cJoogso, cQaado : Str -> Verb ;
+
+  cSug sug = mkVerb sug sug sug ; -- TODO: stem/dictionary form of verbs with consonant clusters?
+
+  cKari, cYaree = \kari -> mkVerb kari kari (kari+"y") ;
+
+  cJoogso joogso =
+    let joogsa = init joogso + "a" ;
+     in mkVerb joogso joogsa (joogsa + "d") ;
+
+  cQaado qaado =
+    let qaa = drop 2 qaado
+     in mkVerb qaado  -- Imperative sg, with the vowel
+              (qaa + "da")  -- Per2 Pl and others
+              (qaa + "t") ; -- Per1 Sg, Per3 Pl and Per3 Sg Masc
+
+  -- Smart paradigms
+  mkV : Str -> Verb = \s -> case s of {
+    _ + #c + #c + "o" => cJoogso s ;
+    _           + "o" => cQaado s ; ----
+    _           + "i" => cKari s ;
+    _          + "ee" => cYaree s ;
+    _                 => cSug s
+    } ;
+
+
+  mkV2 = overload {
+    mkV2 : Str -> Verb2 = \s -> mkV s ** {c2 = noPrep} ;
+    mkV2 : Verb -> Verb2 = \v -> v ** {c2 = noPrep} ;
+    mkV2 : Str -> Preposition -> Verb2 = \s,p -> mkV s ** {c2 = p}
+    } ;
+------------------
+-- Irregular verbs
+
+  copula : Verb = {
+    s = table {
+          VPres Sg1 pol    => if_then_Str pol "ahay" "ihi" ;
+          VPres Sg2 pol    => if_then_Str pol "tahay" "ihid" ;
+          VPres (Sg3 Masc|Impers) pol => if_then_Str pol "yahay" "aha" ;
+          VPres (Sg3 Fem)  pol => if_then_Str pol "tahay" "aha" ;
+          VPres (Pl1 _) pol => if_then_Str pol "nahay" "ihin" ;
+          VPres Pl2 pol     => if_then_Str pol "tihiin" "ihidin" ;
+          VPres Pl3 pol     => if_then_Str pol "yihiin" "aha" ;
+
+          VPast (Sg1|Sg3 Masc|Impers)
+                          => "ahaa" ;
+          VPast (Sg2|Sg3 Fem)
+                          => "ahayd" ;
+          VPast (Pl1 _)   => "ahayn" ;
+          VPast Pl2       => "ahaydeen" ;
+          VPast Pl3       => "ahaayeen" ;
+          VNegPast        => "ahi" ;
+          VImp Sg pol     => if_then_Str pol "ahaw" "ahaanin" ;
+          VImp Pl pol     => if_then_Str pol "ahaada" "ahaanina" ;
+          VInf            => "ahaan" }
+     } ;
+
+  have_V : Verb =
+   let hold_V = mkVerb "hayso" "haysa" "haysat" in {
+    s = table {
+          VPres Sg1        True => "leeyahay" ;
+          VPres Sg2        True => "leedahay" ;
+          VPres (Sg3 Fem)  True => "leedahay" ;
+          VPres (Sg3 Masc|Impers) True
+                                => "leeyahay" ;
+          VPres (Pl1 _)    True => "leenahay" ;
+          VPres Pl2        True => "leedihiin" ;
+          VPres Pl3        True => "leeyihiin" ;
+          VPast x               => "l" + copula.s ! VPast x ;
+          x                     => hold_V.s ! x }
+    } ;
+
+
+------------------
+-- VP
+  Adv : Type = {s,s2 : Str} ; -- Adverb placement is complex
+
+  VP : Type = Verb ** {
+    compl : Agreement => {p1,p2 : Str} ;
+    isCop : Bool ;
+    adv : Adv ;
+    c2, c3 : Preposition -- Prepositions contract, need a parameter instead of Str
+    } ;
+
+  useV : Verb -> VP = \v -> v ** {
+    compl = \\_ => <[],[]> ;
+    isCop = False ;
+    adv = {s,s2 = []} ;
+    c2,c3 = noPrep ;
+    } ;
+
+  compl : NP -> VP -> Str = \np,vp ->
+    prepCombTable ! np.a ! combine vp.c2 vp.c3 ;
+
+  complV2 : NP -> Verb2 -> Str = \np,vp ->
+    prepCombTable ! np.a ! combine vp.c2 noPrep ;
+
+------------------
+-- Sentence type markers
+
+  stmarker : Agreement => Bool => Str = \\a,b =>
+    let stm = if_then_Str b "waa" "ma"
+     in stm ++ subjpron ! a ;
+
+  -- A version that contracts
+  -- stmarkerContr : Agreement => Bool => Str = \\a,b =>
+  --   let stm = if_then_Str b "w" "m"
+  --    in stm + subjpron ! a ;
+
+  subjpron : Agreement => Str = table {
+    Sg1|Pl1 _ => "aan" ;
+    Sg2|Pl2   => "aad" ;
+    Sg3 Masc  => "uu" ;
+    _         => "ay" } ;
+
+--------------------------------------------------------------------------------
+-- Prepositions and their contractions
 
   Prep : Type = { s : Agreement => Str } ;
 
@@ -280,7 +496,6 @@ oper
                       <noPrep,p> => Single p ;
                       <p,noPrep> => Single p ;
                       <p,_> => Single p } -- for trying both ways
-                --      <_,_> => Predef.error (showPrep x ++ showPrep y) } ;
     in case oneWay ! p2 ! p1 of {
               Single x => oneWay ! p1 ! p2 ;
               x        => x } ;
@@ -328,245 +543,10 @@ oper
                    ula => "loola" ; kaga => "lagaga" ;
                    kula => "lagula" ; kala => "lagala" ;
                    Single x => (prepTable ! x).s ! Impers } ;
---
+
     y   => table { ugu => "ugu" ; uga => "uga" ;
                    ula => "ula" ; kaga => "kaga" ;
                    kula => "kula" ; kala => "kala" ;
                    Single x => (prepTable ! x).s ! y }
   } ;
-
--- Negationen má `inte' skrivs samman med en föregående preposition.
---------------------------------------------------------------------------------
--- Adjectives
-
-param
-  AForm = AF Number Case ; ---- TODO: past tense
-
-oper
-
--- Sequences of adjectives follow the rules for restrictive relatives clauses, i.e. are linked by oo 'and' on an indefinite head NP and by ee 'and' on a definite NP (8.1).
-
- -- Komparativ
- -- För att uttrycka motsvarigheten till svenskans komparativ placerar man på somaliska helt enkelt prepositionen ká 'från, av, än' framför adjektivet i fråga. Adjektivet får ingen ändelse.
- -- Shan waa ay ká yar tahay siddéed. Fem är mindre än åtta.
- -- Superlativ
- -- Motsvarigheten till svenskans superlativ bildas med prepositionsklustret ugú som till sin betydelse närmast motsvarar svenskans allra, t.ex.
- -- ugu horrayntii (det att komma) allra först
-
-  Adjective : Type = { s : AForm => Str } ;
-
-  mkA : Str -> Adjective = \yar ->
-    let yaryar = duplicate yar
-    in { s = table {
-           AF Sg Abs => yar ;
-           AF Pl Abs => yaryar ;
-           AF Sg Nom => yar + "i" ;
-           AF Pl Nom => yaryar + "i" }
-       } ;
-
-  duplicate : Str -> Str = \yar -> case yar of {
-    "dheer" => "dhaadheer" ;
-    "weyn"  => "waaweyn" ; -- TODO eventually handle irregular adjectives elsewhere
-    y@#c + a@#v + r@#c + _ => y + a + r + yar ;
-    g@#c + aa@#vv      + _ => g + aa + yar ; --TODO: proper patterns
-    _                      => yar + ":plural" } ;
-
---------------------------------------------------------------------------------
--- Verb
-
-param
-   VForm =
-     VInf
-   | VPres Agreement Bool
-   | VNegPast
-   | VPast Agreement
-   | VFut -- agreement comes from auxiliary
-   | VRel -- "som är/har/…" TODO is this used in other verbs?
-   | VImp Number ; -- TODO negation
-
--- TODO:
--- tre aspekter (enkel, progressiv, habituell),
--- fem modus (indikativ, imperativ, konjunktiv, kontiditonalis, optativ)
-
-oper
-
-
-  Verb : Type = { s : VForm => Str } ;
-
-  Verb2 : Type = Verb ** { c2 : Preposition } ;
-
-  mkVerb : (x1,x2 : Str) -> Verb = \ark,qaat ->
-    let stems : {p1 : Str ; p2 : Str} = case ark of {
-          a + r@#c + k@#c => <ark + "i", a + r + a + voiced k> ;
-          yar + "ee"      => <ark + "n", yar + "ey"> ;
-          _               => <ark + "n", ark> } ;
-        arki = stems.p1 ;
-        arag = stems.p2 ;
-        arkin = case last arki of { "n" => arki ; _ => arki + "n" } ;
-        t : Str = case arag of {
-               _ + ("i"|"y") => "s" ;
-               _             => "t" } ;
-        ay : Str = case ark of {
-               _ + ("i"|"e") => "ey" ;
-               _             => "ay" } ;
-        n : Str = case arag of {
-               _ + #v => "nn" ;
-               _      => "n" } ;
-   in { s = table {
-          VPres (Sg1|Sg3 Masc) pol
-                        => qaat + if_then_Str pol "aa" "o" ;
-          VPres (Sg2|Sg3 Fem) pol
-                        => arag + t + if_then_Str pol "aa" "o" ;
-          VPres (Pl1 _) pol
-                        => arag + n + if_then_Str pol "aa" "o"  ;
-          VPres Pl2 pol => arag + t + "aan" ;
-          VPres Pl3 pol => qaat + "aan" ;
-
-          VPast (Sg1|Sg3 Masc)
-                        => qaat + ay ;
-          VPast (Sg2|Sg3 Fem)
-                        => arag + t + ay ;
-          VPast (Pl1 _) => arag + n + ay ;
-          VPast Pl2     => arag + t + "een" ; -- kari+seen, (sug|joogsa|qaada)+teen
-          VPast Pl3     => qaat + "een" ;
-
-          VImp Sg          => arag ;
-          VImp Pl          => qaat + "a" ; -- TODO: allomorphs, page 86 in Saeed
-          VInf             => arki ;
-          VNegPast         => arkin ;
-          _  => "TODO" }
-      } ;
-
--------------------------
--- Regular verb paradigms
-
-  cSug, cKari, cYaree, cJoogso, cQaado : Str -> Verb ;
-
-  cSug sug = mkVerb sug sug ; -- TODO: stem/dictionary form of verbs with consonant clusters?
-
-  cKari, cYaree = \kari -> mkVerb kari (kari+"y") ;
-
-  cJoogso joogso =
-    let joogsa = init joogso + "a" ;
-     in mkVerb joogsa (joogsa + "d") ;
-
-  cQaado qaado =
-    let qaa = drop 2 qaado
-     in mkVerb (qaa + "da") (qaa + "t") ;
-
-  -- Smart paradigms
-  mkV : Str -> Verb = \s -> case s of {
-    _ + #c + #c + "o" => cJoogso s ;
-    _           + "o" => cQaado s ; ----
-    _           + "i" => cKari s ;
-    _          + "ee" => cYaree s ;
-    _                 => cSug s
-    } ;
-
-
-  mkV2 = overload {
-    mkV2 : Str -> Verb2 = \s -> mkV s ** {c2 = noPrep} ;
-    mkV2 : Str -> Preposition -> Verb2 = \s,p -> mkV s ** {c2 = p}
-    } ;
-------------------
--- Irregular verbs
-
-  copula : Verb = {
-    s = table {
-          VPres Sg1 pol    => if_then_Str pol "ahay" "ihi" ;
-          VPres Sg2 pol    => if_then_Str pol "tahay" "ihid" ;
-          VPres (Sg3 Masc) pol => if_then_Str pol "yahay" "aha" ;
-          VPres (Sg3 Fem)  pol => if_then_Str pol "tahay" "aha" ;
-          VPres (Pl1 _) pol => if_then_Str pol "nahay" "ihin" ;
-          VPres Pl2 pol     => if_then_Str pol "tihiin" "ihidin" ;
-          VPres Pl3 pol     => if_then_Str pol "yihiin" "aha" ;
-
-          VPast (Sg1|Sg3 Masc)
-                          => "ahaa" ;
-          VPast (Sg2|Sg3 Fem)
-                          => "ahayd" ;
-          VPast (Pl1 _)   => "ahayn" ;
-          VPast Pl2       => "ahaydeen" ;
-          VPast Pl3       => "ahaayeen" ;
-          VNegPast        => "ahi" ;
-          VRel => "ah" ;
-          _    => "TODO:copula" }
-     } ;
-   -- I somaliskan används inte något kopulaverb motsvarande svenskans är mellan
-   -- två substantivfraser som utgör subjekt respektive predikatsfyllnad.
-   -- Observera också att kopulaverbet vara alltid hamnar efter det adjektiv
- -- som utgör predikatsfyllnaden.
-  -- TODO: add negation forms
-  have_V : Verb = {
-    s = table {
-          VPres Sg1 _      => "leeyahay" ;
-          VPres Sg2 _      => "leedahay" ;
-          VPres (Sg3 Fem) _ => "leedahay" ;
-          VPres (Sg3 Masc)_ => "leeyahay" ;
-          VPres (Pl1 _) _  => "leenahay" ;
-          VPres Pl2     _  => "leedihiin" ;
-          VPres Pl3     _  => "leeyihiin" ;
-          VPast x          => "l" + copula.s ! VPast x ;
-          VRel => "leh" ;
-          _    => "TODO:have_V" } ;
-    } ;
--- Till VERBFRASEN ansluter sig
--- · satstypsmarkörer (waa, ma...),
--- · subjekts-pronomenet la man,
--- · objektspronomenen,
--- · prepositionerna och
--- · riktnings-adverben soó (mot en plats/person), sií (bort frånen plats/person), wadá tillsammans (mot en gemensam punkt), kalá iväg, isär (bort från en gemensam punkt).
--- Riktningsadverben har ibland en mycket konkret betydelse, men många gånger är betydelsen mera abstrakt.
-
--- Till satsmarkörerna, dvs. både fokusmarkörerna och satstypsmarkörerna ansluter sig
--- subjektspronomenen aan, aad, uu, ay, aynu, men inte la (man).
-
-{- I 1 och 2 person används i princip alltid det korta subjektspronomet i påståendesatser.
-I 3 person utelämnas däremot oftast det korta subjektspronomenet uu han eller ay hon, de efter satsmarkören waa om predikatet består av adjektiv + yahay / tahay / yihiin är.
-Även i satser med andra verb i predikatet utelämnas det korta subjekts- pronomenet i 3 person någon gång ibland.
--}
-
-------------------
--- VP
-  Adv : Type = {s,s2 : Str} ; -- TODO: prepositions contract
-
-  VP : Type = Verb ** {
-    compl : Agreement => {p1,p2 : Str} ;
-    isPred : Bool ;
-    adv : Adv ;
-    c2, c3 : Preposition
-    } ;
-
-  useV : Verb -> VP = \v -> v ** {
-    compl = \\_ => <[],[]> ;
-    isPred = False ;
-    adv = {s,s2 = []} ;
-    c2,c3 = noPrep ;
-    } ;
-
-  compl : NP -> VP -> Str = \np,vp ->
-    prepCombTable ! np.a ! combine vp.c2 vp.c3 ;
-
-  complV2 : NP -> Verb2 -> Str = \np,vp ->
-      prepCombTable ! np.a ! combine vp.c2 noPrep ;
-------------------
--- satstypsmarkörer
-
-  stmarker : Agreement => Bool => Str = \\a,b =>
-    let stm = if_then_Str b "w" "m"
-     in stm + subjpron ! a ;
-
-  stmarkerNoContr : Agreement => Bool => Str = \\a,b =>
-    let stm = if_then_Str b "waa" "ma"
-     in stm ++ subjpron ! a ;
-
-  subjpron : Agreement => Str = table {
-    Sg1|Pl1 _ => "aan" ;
-    Sg2|Pl2   => "aad" ;
-    Sg3 Masc  => "uu" ;
-    _         => "ay" } ;
-
-
-
-
 }
