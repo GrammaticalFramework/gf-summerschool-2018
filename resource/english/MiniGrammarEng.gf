@@ -70,13 +70,13 @@ concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
         <False,False,True,_          > => {fin = "do"   ; inf = vp.verb.s ! VF Inf} ;
 	
         -- non-auxiliary, plain present ; auxiliary, all present: "drinks", "is (not)"
-        <_,    _,   True, Agr Sg Per1> => {fin = vp.verb.s ! PresSg1    ; inf = []} ;
-        <_,    _,   True, Agr Sg Per3> => {fin = vp.verb.s ! VF PresSg3 ; inf = []} ;
-        <_,    _,   True, _>           => {fin = vp.verb.s ! PresPl     ; inf = []} ;
+        <_,_, True, Agr Sg Per1> => {fin = vp.verb.s ! PresSg1    ; inf = []} ;
+        <_,_, True, Agr Sg Per3> => {fin = vp.verb.s ! VF PresSg3 ; inf = []} ;
+        <_,_, True, _>           => {fin = vp.verb.s ! PresPl     ; inf = []} ;
 
         -- all verbs, past: "has (not) drunk", "has (not) been"
-        <_,   _,    False,Agr Sg Per3> => {fin = "has"  ; inf = vp.verb.s ! VF PastPart} ;
-        <_,   _,    False,_          > => {fin = "have" ; inf = vp.verb.s ! VF PastPart} 
+        <_,_, False,Agr Sg Per3> => {fin = "has"  ; inf = vp.verb.s ! VF PastPart} ;
+        <_,_, False,_          > => {fin = "have" ; inf = vp.verb.s ! VF PastPart} 
 
         -- the negation word "not" is put in place in UseCl, UseQCl
       }
