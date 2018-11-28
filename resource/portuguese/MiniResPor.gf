@@ -2,18 +2,27 @@ resource MiniResPor = open Prelude in {
 
   param
     Gender = Masc | Fem ;
+
     Number = Sg | Pl ;
+
     Case   = Nom | Acc ;
+
     Person = Per1 | Per2 | Per3 ;
 
     Agreement = Agr Gender Number Person ;
+
     ClitAgr   = CAgrNo | CAgr Agreement ;
 
-    VForm = VInf | VPres Number Person ;
+    VForm = VInf
+      | VPres Number Person
+      | VPast Number Person
+      | VImp  ImpNumPer ;
+
+    ImpNumPer  = SgPer2 | PlPer1 | PlPer2 ;
 
   oper
     genNumStr : Type = Gender => Number => Str ;
-    
+
     ---
     -- Noun
     NP = {
@@ -32,14 +41,18 @@ resource MiniResPor = open Prelude in {
 
     -- smart paradigms
     smartGenNoun : Str -> Gender -> Noun = \vinho,g -> case vinho of {
+      -- rapaz/Masc, flor/Fem
       rapa + z@("z"|"r"|"s")           =>
-        mkNoun vinho (vinho + "es") g ; -- rapaz/Masc, flor/Fem
+        mkNoun vinho (vinho + "es") g ;
+      -- canal/Masc, vogal/Fem
       can  + v@("a"|"e"|"o"|"u") + "l" =>
-        mkNoun vinho (can + v + "is") g ; -- canal/Masc, vogal/Fem
-      home  + "m"  => mkNoun vinho (home + "ns") g ; -- homem/Masc,
-                                                     -- nuvem/nuvens
+        mkNoun vinho (can + v + "is") g ;
+      -- homem/Masc, nuvem/nuvens
+      home  + "m"  => mkNoun vinho (home + "ns") g ;
+      -- tórax/Masc, xerox/Fem
       tóra + "x"                       =>
-        mkNoun vinho vinho g ; -- tórax/Masc, xerox/Fem
+        mkNoun vinho vinho g ;
+      -- regular inflection
       _                                =>
         regNoun vinho g
       } ;
@@ -65,9 +78,13 @@ resource MiniResPor = open Prelude in {
       mkN : Str -> Str    -> Gender -> Noun = mkNoun ;
       } ;
 
+    ---
+    -- PN
     ProperName : Type = {s : Str ; g : Gender} ;
 
     mkPN : Str -> Gender -> ProperName = \s,g -> {s = s ; g = g} ;
+
+    ---
     -- Pron
     Pron : Type = {s : Case => Str ; a : Agreement} ;
 
@@ -155,29 +172,51 @@ resource MiniResPor = open Prelude in {
 
     neg : Bool -> Str = \b -> case b of {True => [] ; False => "não"} ;
 
-    ser_V = mkV "ser" "sou" "é" "somos" "são" ;
-    estar_V = mkV "estar" "estou" "está" "estamos" "estão" ;
+    ser_V = mkV "ser" "sou" "é" "somos" "são"
+      "fui" "foi" "fomos" "foram" "seja" "sejamos" "sejam";
+    estar_V = mkV "estar" "estou" "está" "estamos" "estão"
+      "estive" "esteve" "estivemos" "estiveram"
+      "esteja" "estejamos" "estejam" ;
 
-    mkVerb : (_,_,_,_,_ : Str) -> Verb =
-      \amar,amo,ama,amamos,amam -> {
+    mkVerb : (_,_,_,_,_,_,_,_,_,_,_,_ : Str) -> Verb =
+      \amar,amo,ama,amamos,amam,amei,amou,amamos,amaram,ame,amemos,amem -> {
       s = table {
-        VInf     => amar ;
+        VInf          => amar ;
         VPres Sg Per1 => amo ;
-        VPres Sg _ => ama ;
+        VPres Sg _    => ama ;
         VPres Pl Per1 => amamos ;
-        VPres Pl _ => amam
+        VPres Pl _    => amam ;
+        VPast Sg Per1 => amei ;
+        VPast Sg _    => amou ;
+        VPast Pl Per1 => amamos ;
+        VPast Pl _    => amaram ;
+        VImp SgPer2   => ame ;
+        VImp PlPer1   => amemos ;
+        VImp PlPer2   => amem
         } ;
       } ;
 
     smartVerb : Str -> Verb = \inf -> case inf of {
-      part + v@("e"|"i") + "r" => mkVerb inf (part+"o") (part+"e") (part+v+"mos") (part+"em") ;
-      am + "ar"  => mkVerb inf (am+"o") (am+"a") (am+"amos") (am+"am") ;
-      _ => mkVerb inf inf inf inf inf
+      -- 1st conj
+      am + "ar"  => mkVerb inf (am+"o") (am+"a") (am+"amos") (am+"am")
+        (am+"ei") (am+"ou") (am+"amos") (am+"aram")
+        (am+"e")  (am+"emos") (am+"em") ;
+      -- 2nd conj
+      com + "er" => mkVerb inf (com+"o") (com+"e") (com+"emos") (com+"em")
+        (com+"i") (com+"eu") (com+"emos") (com+"eram")
+        (com+"a") (com+"amos") (com+"am") ;
+      --3rd conj
+      part + "ir" =>
+        mkVerb inf (part+"o") (part+"e") (part+"imos") (part+"em")
+        (part+"i") (part+"iu") (part+"imos") (part+"iram")
+        (part+"a") (part+"amos") (part+"am") ;
+      -- only pôr, supor and derivatives
+      _ => mkVerb inf inf inf inf inf inf inf inf inf inf inf inf
       } ;
 
     mkV = overload {
       mkV : Str -> Verb = smartVerb ;
-      mkV : (_,_,_,_,_ : Str) -> Verb = mkVerb ;
+      mkV : (_,_,_,_,_,_,_,_,_,_,_,_ : Str) -> Verb = mkVerb ;
       } ;
 
     Verb2 : Type = Verb ** {c : Case ; p : Str} ;
@@ -215,6 +254,7 @@ resource MiniResPor = open Prelude in {
         s = \\g,c => adj.s ! g ! n ;
         n = n
       } ;
+
     ---
     -- Prep
     Prep : Type = {s : genNumStr } ;
@@ -230,4 +270,4 @@ resource MiniResPor = open Prelude in {
                          } ;
       } ;
 
-}
+} ;

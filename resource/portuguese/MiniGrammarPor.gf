@@ -1,3 +1,4 @@
+--# -path=.:../abstract
 concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
   lincat
     Utt = {s : Str} ;
@@ -135,4 +136,4 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
     -- tense
     TSim  = {s = [] ; isPres = True} ;
     TAnt  = {s = [] ; isPres = False} ;
-}
+} ;
