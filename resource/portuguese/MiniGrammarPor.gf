@@ -1,30 +1,56 @@
+--# -path=.:../abstract
 concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
+
   lincat
-    Utt = {s : Str} ;
-    Pol = {s : Str ; b : Bool} ;
+    Utt  = {s : Str} ;
+    Pol  = {s : Str ; p : Bool} ;
+    Temp = {s : Str} ;
+
+    Imp = {s : Bool => Str} ;
+
     S  = {s : Str} ;
-    Cl = {s : Bool => Str} ;
+    QS = {s : Str} ;
+
+    Cl  = {s : Bool => Str} ;
+    QCl = {s : Bool => Str} ;
+
     VP = MiniResPor.VP ;
-    Adv = Adverb ;
+
+    AP = Adjective ;
+
+    CN = Noun ;
     NP = MiniResPor.NP ;
+
+    Pron = MiniResPor.Pron ;
+
     Det = {s : Gender => Case => Str ; n : Number} ;
     Conj = {s : Str} ;
     Prep = MiniResPor.Prep ;
-    AP = Adjective ;
-    CN = Noun ;
+
     V = Verb ;
     V2 = Verb2 ;
+
     A = Adjective ;
+
     N = Noun ;
     PN = ProperName ;
-    Pron = MiniResPor.Pron ;
+
+    Adv = Adverb ;
+
   lin
     -- Phrase
-    UttS s = s ;
+    UttS  s  = s ;
+    UttQS qs = qs ;
+
     UttNP np = ss (employNP Nom np) ;
+
+    UttAdv adv = adv ;
+
+    UttImpSg pol imp = {s = pol.s ++ imp.s ! pol.p} ;
+
     -- Sentence
     UseCl temp pol cl = {
-      s = temp.s ++ pol.s ++ cl.s ! pol.b
+      s = temp.s ++ pol.s ++ cl.s ! pol.p
       } ;
     PredVP np vp = let subj = (np.s ! Nom).obj ;
                        obj = vp.compl ! np.a ;
@@ -130,9 +156,9 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
     and_Conj = {s = "e"} ;
     or_Conj = {s = "ou"} ;
     -- polarity
-    PPos  = {s = [] ; b = True} ;
-    PNeg  = {s = [] ; b = False} ;
+    PPos  = {s = [] ; p = True} ;
+    PNeg  = {s = [] ; p = False} ;
     -- tense
     TSim  = {s = [] ; isPres = True} ;
     TAnt  = {s = [] ; isPres = False} ;
-}
+} ;
