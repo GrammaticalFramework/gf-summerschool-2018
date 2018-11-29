@@ -3,16 +3,15 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
 
   lincat
     Utt  = {s : Str} ;
-    Pol  = {s : Str ; p : Bool} ;
-    Temp = {s : Str} ;
+    Pol  = {s : Str ; isPos : Bool} ;
+    Temp = {s : Str ; isPres : Bool} ;
 
     Imp = {s : Bool => Str} ;
 
     S  = {s : Str} ;
     QS = {s : Str} ;
 
-    Cl  = {s : Bool => Str} ;
-    QCl = {s : Bool => Str} ;
+    Cl, QCl  = {s : Bool => Bool => Str} ;
 
     VP = MiniResPor.VP ;
 
@@ -46,19 +45,36 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
 
     UttAdv adv = adv ;
 
-    UttImpSg pol imp = {s = pol.s ++ imp.s ! pol.p} ;
+    UttImpSg pol imp = {s = pol.s ++ imp.s ! pol.isPos} ;
 
     -- Sentence
     UseCl temp pol cl = {
-      s = temp.s ++ pol.s ++ cl.s ! pol.p
+      s = temp.s ++ pol.s ++ cl.s ! pol.isPos ! temp.isPres
       } ;
+
+    UseQCl temp pol qcl = {
+      s = temp.s ++ pol.s ++ qcl.s ! pol.isPos ! temp.isPres
+      } ;
+
+    QuestCl cl = cl ; -- WIP
+
     PredVP np vp = let subj = (np.s ! Nom).obj ;
                        obj = vp.compl ! np.a ;
                        clit = vp.clit ;
                        verb = agrV vp.verb np.a
       in {
-        s = \\b => subj ++ clit ++ neg b ++ verb ++ obj
+        s = \\isPos,isPres => subj ++ clit ++ neg isPos ++ verb ! isPres ++ obj
       } ;
+
+    ImpVP vp = {
+      -- WIP what about other agreements?
+      s = table {
+        True  => vp.verb.s ! VImp SgPer2 ++ vp.clit ++ vp.compl ! (Agr Masc Sg Per3) ;
+        False => neg False ++ vp.clit ++
+          vp.verb.s ! VImp SgPer2 ++ vp.compl ! (Agr Masc Sg Per3)
+        }
+      } ;
+
     -- Verb
     UseV v = {
       verb = v ;
@@ -66,6 +82,7 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
       clitAgr = CAgrNo ;
       compl = \\_ => []
       } ;
+
     ComplV2 v2 np = let nps = np.s ! v2.c in {
       verb = {s = v2.s} ;
       clit = nps.clit ;
@@ -75,29 +92,33 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
         } ;
       compl = \\_ => v2.p ++ nps.obj
       } ;
-    AdvVP vp adv = vp ** {compl = \\agr => vp.compl ! agr ++ adv.s } ;
+
+    UseNP np = { -- WIP
+      verb = ser_V ;
+      clit = [] ;
+      clitAgr = CAgrNo ;
+      compl = \\_ => (np.s ! Nom).obj
+      } ;
+
+    UseAdv adv = {
+      verb = estar_V ;
+      clit = [] ;
+      clitAgr = CAgrNo ;
+      compl = \\_ => adv.s
+      } ;
+
     UseAP ap = {
-      verb = ser_V | estar_V ;
+      verb = ser_V | estar_V ; -- [ ] remove variants
       clit = [] ;
       clitAgr = CAgrNo ;
       compl = \\agr => case agr of {
         Agr g n _ => ap.s ! g ! n
         }
       } ;
-    -- Noun, CN, NP
-    UseN n = n ;
-    PositA a = a ;
-    PrepNP prep np = case np.a of {
-      Agr g n _ => {s = prep.s ! g ! n ++ employNP Nom np}
-      } ;
-    AdjCN ap cn = case ap.isPre of {
-        True => cn ** {s = table {n => ap.s ! cn.g ! n ++ cn.s ! n}} ;
-        False => cn ** {s = table {n => cn.s ! n ++ ap.s ! cn.g ! n}}
-      } ;
-    MassNP cn = {
-      s = \\_ => {clit = [] ; obj = cn.s ! Sg ; isClit = False} ;
-      a = Agr cn.g Sg Per3
-      } ;
+
+    AdvVP vp adv = vp ** {compl = \\agr => vp.compl ! agr ++ adv.s } ;
+
+    -- Noun
     DetCN det cn = {
       s = \\c => {clit = [] ;
                   obj = det.s ! cn.g ! c ++ cn.s ! det.n ;
@@ -105,11 +126,12 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
         } ;
       a = Agr cn.g det.n Per3 ;
       } ;
+
     UsePN pn = {
       s = \\_ => {clit = [] ; obj = pn.s ; isClit = False} ;
       a = Agr pn.g Sg Per3
       } ;
-    -- Pron
+
     UsePron p = {
       s = table {
         Nom => {clit = [] ;
@@ -121,6 +143,53 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
         } ;
       a = p.a
       } ;
+
+    MassNP cn = {
+      s = \\_ => {clit = [] ; obj = cn.s ! Sg ; isClit = False} ;
+      a = Agr cn.g Sg Per3
+      } ;
+
+    a_Det   = adjDet um_adjDet Sg ;
+    aPl_Det = adjDet um_adjDet Pl ;
+
+    the_Det   = adjDet um_adjDet Sg ;
+    thePl_Det = adjDet um_adjDet Pl ;
+
+    UseN n = n ;
+
+    AdjCN ap cn = case ap.isPre of {
+        True => cn ** {s = table {n => ap.s ! cn.g ! n ++ cn.s ! n}} ;
+        False => cn ** {s = table {n => cn.s ! n ++ ap.s ! cn.g ! n}}
+      } ;
+
+    -- Adjective
+    PositA a = a ;
+
+    -- Adverb
+    PrepNP prep np = case np.a of {
+      Agr g n _ => {s = prep.s ! g ! n ++ employNP Nom np}
+      } ;
+
+    -- Conjunction
+    CoordS conj a b = {s = a.s ++ conj.s ++ b.s} ;
+
+    -- Tense
+    PPos  = {s = [] ; isPos = True} ;
+    PNeg  = {s = [] ; isPos = False} ;
+
+    TSim  = {s = [] ; isPres = True} ;
+    TAnt  = {s = [] ; isPres = False} ;
+
+    -- Structural
+    and_Conj = {s = "e"} ;
+    or_Conj = {s = "ou"} ;
+
+    every_Det = adjDet (mkAdjective "todo" "toda" [] [] True) Sg ;
+
+    in_Prep = no_Prep ;
+    on_Prep = no_Prep ;
+    with_Prep = {s = \\_ => \\_ => "com"} ;
+
     i_Pron = iMasc_Pron | genderPron Fem iMasc_Pron ;
     youSg_Pron = youMascSg_Pron | genderPron Fem youMascSg_Pron ;
     he_Pron = {
@@ -141,24 +210,8 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
         s = table {Nom => "elas" ; Acc => "as"} ;
         a = Agr Fem Pl Per2
           } ;
-    -- Det
-    a_Det     = adjDet (mkAdjective "um" "uma" [] [] True) Sg ;
-    aPl_Det   = adjDet (mkAdjective [] [] "uns" "umas" True) Pl ;
-    the_Det   = adjDet (mkAdjective "o" "a" [] [] True) Sg ;
-    thePl_Det = adjDet (mkAdjective [] [] "os" "as" True) Pl ;
-    every_Det = adjDet (mkAdjective "todo" "toda" [] [] True) Sg ;
-    -- Prep
-    in_Prep = no_Prep ;
-    on_Prep = no_Prep ;
-    with_Prep = {s = \\_ => \\_ => "com"} ;
-    -- Conjunction/Disjunction
-    CoordS conj a b = {s = a.s ++ conj.s ++ b.s} ;
-    and_Conj = {s = "e"} ;
-    or_Conj = {s = "ou"} ;
-    -- polarity
-    PPos  = {s = [] ; p = True} ;
-    PNeg  = {s = [] ; p = False} ;
-    -- tense
-    TSim  = {s = [] ; isPres = True} ;
-    TAnt  = {s = [] ; isPres = False} ;
+
+    have_V2 = mkV2 ter_V ;
+
+
 } ;
