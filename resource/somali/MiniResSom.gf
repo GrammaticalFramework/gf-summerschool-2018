@@ -312,20 +312,19 @@ oper
     let cabb : Str = case sug of {
           _ + "b" => sug + "b" ; -- TODO: more duplication patterns
           _       => sug }
-     in mkVerb sug sug sug ;
+     in mkVerb sug cabb sug ;
 
-  cKari, cYaree = \kari -> mkVerb kari kari (kari+"y") ;
+  cKari, cYaree = \kari -> mkVerb kari (kari+"y") kari ;
 
   cJoogso joogso =
     let joogsa = init joogso + "a" ;
-     in mkVerb joogso joogsa (joogsa + "d") ;
+     in mkVerb joogso (joogsa + "d") joogsa ;
 
   cQaado qaado =
     let qaa = drop 2 qaado
      in mkVerb qaado  -- Imperative sg, with the vowel
-              (qaa + "da")  -- Per2 Pl and others
               (qaa + "t") ; -- Per1 Sg, Per3 Pl and Per3 Sg Masc
-
+              (qaa + "da")  -- Per2 Pl and others
 
 ------------------
 -- Irregular verbs
