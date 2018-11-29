@@ -166,8 +166,11 @@ resource MiniResPor = open Prelude in {
 
     Verb : Type = {s : VForm => Str } ;
 
-    agrV : Verb -> Agreement -> Str = \v,a -> case a of {
-      Agr _ n p => v.s ! VPres n p
+    agrV : Verb -> Agreement -> Bool => Str = \v,a -> case a of {
+      Agr _ n p => table {
+        True  => v.s ! VPres n p ;
+        False => v.s ! VPast n p
+        }
       } ;
 
     neg : Bool -> Str = \b -> case b of {True => [] ; False => "não"} ;
@@ -177,6 +180,9 @@ resource MiniResPor = open Prelude in {
     estar_V = mkV "estar" "estou" "está" "estamos" "estão"
       "estive" "esteve" "estivemos" "estiveram"
       "esteja" "estejamos" "estejam" ;
+    ter_V = mkV "ter" "tenho" "tem" "temos" "tem"
+      "tive" "teve" "tivemos" "tiveram"
+      "tenha" "tenhamos" "tenham" ;
 
     mkVerb : (_,_,_,_,_,_,_,_,_,_,_,_ : Str) -> Verb =
       \amar,amo,ama,amamos,amam,amei,amou,amamos,amaram,ame,amemos,amem -> {
@@ -254,6 +260,9 @@ resource MiniResPor = open Prelude in {
         s = \\g,c => adj.s ! g ! n ;
         n = n
       } ;
+
+    um_adjDet = mkAdjective "um" "uma" "uns" "umas" True ;
+    o_adjDet = mkAdjective "o" "a" "os" "as" True ;
 
     ---
     -- Prep
