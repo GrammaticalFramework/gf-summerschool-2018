@@ -323,8 +323,8 @@ oper
   cQaado qaado =
     let qaa = drop 2 qaado
      in mkVerb qaado  -- Imperative sg, with the vowel
-              (qaa + "t") ; -- Per1 Sg, Per3 Pl and Per3 Sg Masc
-              (qaa + "da")  -- Per2 Pl and others
+              (qaa + "t")  -- Per1 Sg, Per3 Pl and Per3 Sg Masc
+              (qaa + "da") ;  -- Per2 Pl and others
 
 ------------------
 -- Irregular verbs
