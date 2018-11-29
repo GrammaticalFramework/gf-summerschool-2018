@@ -1,6 +1,6 @@
 concrete MiniGrammarSom of MiniGrammar = open
-  (M=MiniResSom),
-  MiniResSom,
+  (M=MiniResSom), -- qualified import: can write M.someOper instead of full name, MiniResSom.someOper
+  MiniResSom, -- import also without qualification, so we can write just someOper
   Prelude in {
 
 
@@ -23,8 +23,8 @@ concrete MiniGrammarSom of MiniGrammar = open
     AP = Adjective ;
     CN = CNoun ;
     NP,
-    Pron = M.NP ;
-    Det = M.Det ;
+    Pron = M.NP ; -- M.NP because the name NP would be otherwise ambiguous
+    Det = M.Det ; -- M.Det because the name Det would be otherwise ambiguous
     Conj = {s : Str} ;
     Prep = M.Prep ;
     V = Verb ;
@@ -113,8 +113,8 @@ concrete MiniGrammarSom of MiniGrammar = open
              case <c,cn.hasMod,det.d> of {
                 <Nom,True, Indef Sg>  => {nf=Indef Sg  ; c=Abs} ;
                 <Nom,False,Indef Sg>  => {nf=IndefNom  ; c=Nom} ; -- special form for fem. nouns
-                <Nom,True,Def x M.A>  => {nf=Def x M.A ; c=Abs} ;
-                <Nom,False,Def x M.A> => {nf=Def x M.U ; c=Nom} ;
+                <Nom,True,Def x vA>  => {nf=Def x vA ; c=Abs} ;
+                <Nom,False,Def x vA> => {nf=Def x vU ; c=Nom} ;
                 _                     => {nf=det.d ; c=c}
              } ;
             in cn.s ! nfc.nf
@@ -135,8 +135,8 @@ concrete MiniGrammarSom of MiniGrammar = open
 
     a_Det = mkDet [] "uu" [] (Indef Sg) ;
     aPl_Det = mkDet [] "ay" [] (Indef Pl) ;
-    the_Det = mkDet "a" "kani" "tani" (Def Sg M.A) ;
-    thePl_Det = mkDet "a" "kuwan" "kuwan" (Def Pl M.A) ;
+    the_Det = mkDetBind True "a" "kani" "tani" (Def Sg vA) ;
+    thePl_Det = mkDetBind True "a" "kuwan" "kuwan" (Def Pl vA) ;
 
     AdjCN ap cn = cn ** {
       s = table { IndefNom => cn.s ! Indef Sg ; -- When an adjective is added, noun loses case marker.
@@ -168,7 +168,7 @@ concrete MiniGrammarSom of MiniGrammar = open
 
     or_Conj = {s = "ama"} ; -- mise with interrogatives
 
-    every_Det = mkDetBind False "kasta" "kasta" "kasta" (Indef Sg) ;
+    every_Det = mkDet "kasta" "kasta" "kasta" (Indef Sg) ;
 
     -- This is complicated, because prepositions combine with each other.
     in_Prep,
@@ -204,5 +204,5 @@ concrete MiniGrammarSom of MiniGrammar = open
       a = Pl3 ; isPron = True ; sp = "iyaga"
       } ;
 
-    have_V2 = mkV2 M.have_V ;
+    have_V2 = M.have_V ** {c2 = noPrep} ;
 }
