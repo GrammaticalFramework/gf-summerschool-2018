@@ -1,19 +1,15 @@
 resource MiniResSom = open Prelude, Predef in {
-
 --------------------------------------------------------------------------------
--- Clause
+-- Phonological definitions
+  oper
 
-param
-  Tense = Simultanous | Anterior ;
-  QForm = Question | Statement ;
-
-oper
-  -- choose the right form of the verb
-  inflVerb : Tense -> Bool -> Agreement -> VP -> Str = \t,b,a,vp ->
-    vp.s ! case <t,b> of {
-             <Simultaneous,_> => VPres a b ;
-             <Anterior,True>  => VPast a ;
-             <Anterior,False> => VNegPast } ;
+    v : pattern Str = #("a" | "e" | "i" | "o" | "u") ;
+    vv : pattern Str = #("aa" | "ee" | "ii" | "oo" | "uu") ;
+    vstar : pattern Str = #("a" | "e" | "i" | "o" | "u" | "y" | "w") ; -- semivowels included
+    c : pattern Str = #("m" | "n" | "p" | "b" | "t" | "d" | "k" | "g" | "f" | "v" | "s" | "h" | "l" | "j" | "r" | "z" | "c" | "q" | "y" | "w") ;
+    lmnr : pattern Str = #("l" | "m" | "n" | "r") ;
+    kpt : pattern Str = #("k" | "p" | "t") ;
+    gbd : pattern Str = #("g" | "b" | "d") ;
 
 --------------------------------------------------------------------------------
 -- Nominal morphology
@@ -23,7 +19,7 @@ param
   Case = Nom | Abs ;
   Gender = Masc | Fem ;
   Person = Per1 | Per2 | Per3 ;
-  Vowel = A | E | I | O | U ; -- For vowel assimilation
+  Vowel = vA | vE | vI | vO | vU ; -- For vowel assimilation
 
   Inclusion = Excl | Incl ;
   Agreement = Sg1 | Sg2 | Sg3 Gender | Pl1 Inclusion | Pl2 | Pl3 | Impers ;
@@ -59,11 +55,11 @@ oper
 
         defStems : Str -> Vowel => Str = \s -> case s of {
           ilk + "aha" => -- Vowel assimilates to the following suffix after h
-               table { A => ilk+"ah" ;
-                       E => ilk+"eh" ;
-                       I => ilk+"ih" ;
-                       O => ilk+"oh" ;
-                       U => ilk+"uh"
+               table { vA => ilk+"ah" ;
+                       vE => ilk+"eh" ;
+                       vI => ilk+"ih" ;
+                       vO => ilk+"oh" ;
+                       vU => ilk+"uh"
                        } ;
           _ => table { _ => init s } -- No assimilations
           } ;
@@ -129,7 +125,7 @@ oper
                   "c"|"g"|"i"|"j"|"x"|"s"     => "yo" ;
                   _                           => "o" } ;
 
-      -- Based on the table on page 21--TODO find generalisations in patterns
+      -- Based on the table on page 21 in http://morgannilsson.se/Somalisk%20minigrammatik.pdf
       mTa => case stem of {
                    _ + ("dh")  => "a" ;
                    _ + ("d"|"c"|"h"|"x"|"q"|"'"|"i"|"y"|"w") => "da" ;
@@ -152,46 +148,10 @@ oper
 param
   Morpheme = mO | mKa | mTa ;
 
+
+---------------------------------------------
+-- NP
 oper
-
-   --TODO: make patterns actually adjusted to Somali, these are just copied from elsewhere
-  v : pattern Str = #("a" | "e" | "i" | "o" | "u") ;
-  vv : pattern Str = #("aa" | "ee" | "ii" | "oo" | "uu") ;
-  c : pattern Str = #("m" | "n" | "p" | "b" | "t" | "d" | "k" | "g" | "f" | "v" | "s" | "h" | "l" | "j" | "r" | "z" | "c" | "q" | "y" | "w") ;
-  lmnr : pattern Str = #("l" | "m" | "n" | "r") ;
-  kpt : pattern Str = #("k" | "p" | "t") ;
-  gbd : pattern Str = #("g" | "b" | "d") ;
-
-
-  mkN = overload {
-    mkN : Str -> Noun = mkN1 ;
-    mkN : Str -> Gender -> Noun = mkNg ;
-    mkN : (_,_ : Str) -> Gender -> Noun = nMaalin ;
-    mkN : Noun -> Gender -> Noun = \n,g ->
-      n ** { g = g } ;
-  } ;
-
-  mkN1 : Str -> Noun = \n -> case n of {
-      _ + ("ad"|"adh") => nUl n ;
-      _ + "o"          => nHooyo n ;
-      _ + "e"          => nAabbe n ;
-      _ + "ri"         => nGuri n ;
-      (#c + #v + #v + #c) -- One syllable words
-       | (#v + #v + #c)
-       | (#c + #v + #c)
-       | (#v + #c)     => nMas n ;
-      _                => nXayawaan n } ;
-
-  mkNg : Str -> Gender -> Noun = \n,g -> case n of {
-      _ + ("r"|"n"|"l"|"g")
-          => case g of {
-                  Fem  => nUl n ;
-                  Masc => mkN1 n } ;
-      _   => mkN1 n
-   } ; -- TODO: add more exceptional cases
-
-  ---------------------------------------------
-  -- NP
 
   BaseNP : Type = {
     a : Agreement ;
@@ -213,7 +173,7 @@ oper
     d : NForm
     } ;
 
-  mkDet : (x1,_,x3 : Str) -> NForm -> Det = mkDetBind True ;
+  mkDet : (x1,_,x3 : Str) -> NForm -> Det = mkDetBind False ;
 
   -- TODO: generalise better for all dets
   mkDetBind : (bind : Bool) -> (x1,_,x3 : Str) -> NForm -> Det = \b,an,kani,tani,nf ->
@@ -233,36 +193,41 @@ oper
 -- Adjectives
 
 param
-  AForm = AF Number Case ; ---- TODO: past tense
+  AForm = AF Number Case ;
 
 oper
-
--- Sequences of adjectives follow the rules for restrictive relatives clauses, i.e. are linked by oo 'and' on an indefinite head NP and by ee 'and' on a definite NP (8.1).
-
- -- Komparativ
- -- För att uttrycka motsvarigheten till svenskans komparativ placerar man på somaliska helt enkelt prepositionen ká 'från, av, än' framför adjektivet i fråga. Adjektivet får ingen ändelse.
- -- Shan waa ay ká yar tahay siddéed. Fem är mindre än åtta.
- -- Superlativ
- -- Motsvarigheten till svenskans superlativ bildas med prepositionsklustret ugú som till sin betydelse närmast motsvarar svenskans allra, t.ex.
- -- ugu horrayntii (det att komma) allra först
-
   Adjective : Type = { s : AForm => Str } ;
 
-  mkA : Str -> Adjective = \yar ->
+  duplA : Str -> Adjective = \yar ->
     let yaryar = duplicate yar
-    in { s = table {
-           AF Sg Abs => yar ;
-           AF Pl Abs => yaryar ;
-           AF Sg Nom => yar + "i" ;
-           AF Pl Nom => yaryar + "i" }
-       } ;
+    in mkAdj yar yaryar ;
 
-  duplicate : Str -> Str = \yar -> case yar of {
+  mkAdj : (str,pl : Str) -> Adjective = \sg,pl -> {
+    s = table {
+          AF Sg Abs => sg ;
+          AF Pl Abs => pl ;
+          AF Sg Nom => sg + "i" ;
+          AF Pl Nom => pl + "i" }
+    } ;
+
+  duplicate : Str -> Str = \sg -> case sg of {
+    -- some hard-coded cases; in general, better to
+    -- use 2-paradigm mkAdj for irregular adjectives.
     "dheer" => "dhaadheer" ;
-    "weyn"  => "waaweyn" ; -- TODO eventually handle irregular adjectives elsewhere
-    y@#c + a@#v + r@#c + _ => y + a + r + yar ;
-    g@#c + aa@#vv      + _ => g + aa + yar ; --TODO: proper patterns
-    _                      => yar + ":plural" } ;
+    "weyn"  => "waaweyn" ;
+
+    -- general patterns
+    a@#v + d@#c + ? + ?  -- 4 letters of form CVXX
+        => a + d + sg ; -- ad+adag
+    g@#c + aa@#vv + _
+        => g + aa + sg ; -- gaa+gaaban
+    y@#c + a@#v + r@#c + _
+        => y + a + r + sg ; -- yar+yar ; fud+fudud
+    d@#c + h@#c + uu@#vv + _
+        => d + h + uu + sg ; -- dhuu+dhuuban
+    q@#c + a@#v + y@#vstar + b@#c + _
+        => q + a + y + b + sg ; --qayb+qaybsan, fiic+fiican
+    _   => sg + sg } ;
 
 --------------------------------------------------------------------------------
 -- Verb
@@ -273,23 +238,20 @@ param
    | VPres Agreement Bool
    | VNegPast
    | VPast Agreement
-   | VImp Number Bool ;
-
--- TODO:
--- tre aspekter (enkel, progressiv, habituell),
--- fem modus (indikativ, imperativ, konjunktiv, kontiditonalis, optativ)
+   | VImp Number Bool ; -- Not all forms, just those needed for the Doctor app
 
 oper
 
+  Verb : Type = {s : VForm => Str} ;
 
-  Verb : Type = { s : VForm => Str } ;
+  Verb2 : Type = Verb ** {c2 : Preposition} ;
 
-  Verb2 : Type = Verb ** { c2 : Preposition } ;
-
-  mkVerb : (imperative,p2pl,p1sg : Str) -> Verb = \qaado,ark,qaat ->
+  mkVerb : (imperative,sg1,pl2 : Str) -> Verb = \qaado,qaat,ark ->
     let stems : {p1 : Str ; p2 : Str} = case ark of {
           a + r@#c + k@#c -- two consonants need a vowel in between
             => <ark + "i", a + r + a + voiced k> ;
+          _ + #c -- if the pl2 root ends in consonant, infinitive needs a vowel
+            => <ark + "i", ark> ;
           yar + "ee"  -- double e turns into ey
             => <ark + "n", yar + "ey"> ;
           _ => <ark + "n", ark> -- no changes, just add n for infinitive
@@ -303,6 +265,7 @@ oper
         -- Some predictable sound changes
         t : Str = case arag of {
                _ + ("i"|"y") => "s" ; -- t changes into s in front of i/y:
+               _ + ("x"|"q"|"c") => "d" ;
                _             => "t" } ; -- kari+seen, (sug|joogsa|qaada)+teen
         ay : Str = case ark of {
                _ + ("i"|"e") => "ey" ;
@@ -326,9 +289,9 @@ oper
           VPast (Sg1|Sg3 Masc|Impers)
                         => qaat + ay ;
           VPast (Sg2|Sg3 Fem)
-                        => arag + t + ay ;
+                        => arag + t + ay ; -- t, d or s
           VPast (Pl1 _) => arag + n + ay ;
-          VPast Pl2     => arag + t + "een" ;
+          VPast Pl2     => arag + t + "een" ; -- t, d or s
           VPast Pl3     => qaat + "een" ;
 
           VImp Sg True     => qaado ;
@@ -345,7 +308,11 @@ oper
 
   cSug, cKari, cYaree, cJoogso, cQaado : Str -> Verb ;
 
-  cSug sug = mkVerb sug sug sug ; -- TODO: stem/dictionary form of verbs with consonant clusters?
+  cSug sug =
+    let cabb : Str = case sug of {
+          _ + "b" => sug + "b" ; -- TODO: more duplication patterns
+          _       => sug }
+     in mkVerb sug sug sug ;
 
   cKari, cYaree = \kari -> mkVerb kari kari (kari+"y") ;
 
@@ -359,21 +326,7 @@ oper
               (qaa + "da")  -- Per2 Pl and others
               (qaa + "t") ; -- Per1 Sg, Per3 Pl and Per3 Sg Masc
 
-  -- Smart paradigms
-  mkV : Str -> Verb = \s -> case s of {
-    _ + #c + #c + "o" => cJoogso s ;
-    _           + "o" => cQaado s ; ----
-    _           + "i" => cKari s ;
-    _          + "ee" => cYaree s ;
-    _                 => cSug s
-    } ;
 
-
-  mkV2 = overload {
-    mkV2 : Str -> Verb2 = \s -> mkV s ** {c2 = noPrep} ;
-    mkV2 : Verb -> Verb2 = \v -> v ** {c2 = noPrep} ;
-    mkV2 : Str -> Preposition -> Verb2 = \s,p -> mkV s ** {c2 = p}
-    } ;
 ------------------
 -- Irregular verbs
 
@@ -401,7 +354,7 @@ oper
      } ;
 
   have_V : Verb =
-   let hold_V = mkVerb "hayso" "haysa" "haysat" in {
+   let hold_V = mkVerb "hayso" "haysat" "haysa" in {
     s = table {
           VPres Sg1        True => "leeyahay" ;
           VPres Sg2        True => "leedahay" ;
@@ -415,6 +368,10 @@ oper
           x                     => hold_V.s ! x }
     } ;
 
+  -- Constructs verbs like u baahan+ahay
+  prefixV : Str -> Verb -> Verb = \s,v -> {
+    s = \\vf => s + v.s ! vf
+  } ;
 
 ------------------
 -- VP
@@ -459,6 +416,21 @@ oper
     _         => "ay" } ;
 
 --------------------------------------------------------------------------------
+-- Clause
+
+param
+  Tense = Simultanous | Anterior ;
+  QForm = Question | Statement ;
+
+oper
+  -- choose the right form of the verb
+  inflVerb : Tense -> Bool -> Agreement -> VP -> Str = \t,b,a,vp ->
+    vp.s ! case <t,b> of {
+             <Simultaneous,_> => VPres a b ;
+             <Anterior,True>  => VPast a ;
+             <Anterior,False> => VNegPast } ;
+
+--------------------------------------------------------------------------------
 -- Prepositions and their contractions
 
   Prep : Type = { s : Agreement => Str } ;
@@ -477,7 +449,10 @@ oper
 
 
 param
+  -- These are exported via MiniParadigmsSom
   Preposition = u | ku | ka | la | noPrep ;
+
+  -- These are completely internal, and user shouldn't need to write these ever
   PrepCombination = ugu | uga | ula | kaga | kula | kala
                   | Single Preposition ;
 
