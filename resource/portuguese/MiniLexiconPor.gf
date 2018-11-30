@@ -1,5 +1,6 @@
 --# -path=.:../abstract
-concrete MiniLexiconPor of MiniLexicon = MiniGrammarPor ** open MiniResPor, Prelude in {
+concrete MiniLexiconPor of MiniLexicon = MiniGrammarPor
+  ** open MiniParadigmsPor, MiniResPor, Prelude in {
   --- Adjective
   lin bad_A    = mkA "mau" "má" "maus" "más" True ;
   lin big_A    = mkA "grande" True ;

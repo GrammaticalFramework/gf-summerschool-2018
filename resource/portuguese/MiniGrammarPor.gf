@@ -24,7 +24,7 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
 
     Det = {s : Gender => Case => Str ; n : Number} ;
     Conj = {s : Str} ;
-    Prep = MiniResPor.Prep ;
+    Prep = Preposition ;
 
     V = Verb ;
     V2 = Verb2 ;
@@ -34,7 +34,7 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
     N = Noun ;
     PN = ProperName ;
 
-    Adv = Adverb ;
+    Adv = {s : Str} ;
 
   lin
     -- Phrase
@@ -108,7 +108,7 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
       } ;
 
     UseAP ap = {
-      verb = ser_V | estar_V ; -- [ ] remove variants
+      verb = ser_V ;
       clit = [] ;
       clitAgr = CAgrNo ;
       compl = \\agr => case agr of {
@@ -150,10 +150,10 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
       } ;
 
     a_Det   = adjDet um_adjDet Sg ;
-    aPl_Det = adjDet um_adjDet Pl ;
+    aPl_Det = {s = \\_,_ => [] ; n = Pl} ;
 
-    the_Det   = adjDet um_adjDet Sg ;
-    thePl_Det = adjDet um_adjDet Pl ;
+    the_Det   = adjDet o_adjDet Sg ;
+    thePl_Det = adjDet o_adjDet Pl ;
 
     UseN n = n ;
 
@@ -190,8 +190,8 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
     on_Prep = no_Prep ;
     with_Prep = {s = \\_ => \\_ => "com"} ;
 
-    i_Pron = iMasc_Pron | genderPron Fem iMasc_Pron ;
-    youSg_Pron = youMascSg_Pron | genderPron Fem youMascSg_Pron ;
+    i_Pron = iMasc_Pron ;
+    youSg_Pron = youMascSg_Pron ;
     he_Pron = {
       s = table {Nom => "ele" ; Acc => "o"} ;
       a = Agr Masc Sg Per3
@@ -200,18 +200,14 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
       s = table {Nom => "ela" ; Acc => "a"} ;
       a = Agr Fem Sg Per3
       } ;
-    we_Pron    = weMasc_Pron | genderPron Fem weMasc_Pron ;
-    youPl_Pron = youMascPl_Pron | genderPron Fem youMascPl_Pron ;
+    we_Pron    = weMasc_Pron ;
+    youPl_Pron = youMascPl_Pron ;
     they_Pron = {
       s = table {Nom => "eles" ; Acc => "os"} ;
       a = Agr Masc Pl Per2
-      }
-      | {
-        s = table {Nom => "elas" ; Acc => "as"} ;
-        a = Agr Fem Pl Per2
-          } ;
+      } ;
 
-    have_V2 = mkV2 ter_V ;
+    have_V2 = ter_V ** {c = Nom ; p = []} ;
 
 
 } ;
