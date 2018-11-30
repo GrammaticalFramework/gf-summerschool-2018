@@ -37,10 +37,12 @@ resource MiniResPor = open Prelude in {
       g = g
       } ;
 
-    regNoun : Str -> Gender -> Noun = \sg,g -> mkNoun sg (sg + "s") g;
+    regNoun : Str -> Gender -> Noun ;
+    regNoun sg g = mkNoun sg (sg + "s") g;
 
     -- smart paradigms
-    smartGenNoun : Str -> Gender -> Noun = \vinho,g -> case vinho of {
+    smartGenNoun : Str -> Gender -> Noun ;
+    smartGenNoun vinho g = case vinho of {
       -- rapaz/Masc, flor/Fem
       rapa + z@("z"|"r"|"s")           =>
         mkNoun vinho (vinho + "es") g ;
@@ -57,7 +59,8 @@ resource MiniResPor = open Prelude in {
         regNoun vinho g
       } ;
 
-    smartNoun : Str -> Noun = \vinho -> case vinho of {
+    smartNoun : Str -> Noun ;
+    smartNoun vinho = case vinho of {
       cas   + "a"  => regNoun vinho Fem ;
       vinh  + "o"  => regNoun vinho Masc ;
       falc  + "ão" =>
@@ -72,17 +75,9 @@ resource MiniResPor = open Prelude in {
       _           => smartGenNoun vinho Masc
       } ;
 
-    mkN = overload {
-      mkN : Str -> Noun                     = smartNoun ;
-      mkN : Str -> Gender -> Noun           = smartGenNoun ;
-      mkN : Str -> Str    -> Gender -> Noun = mkNoun ;
-      } ;
-
     ---
     -- PN
     ProperName : Type = {s : Str ; g : Gender} ;
-
-    mkPN : Str -> Gender -> ProperName = \s,g -> {s = s ; g = g} ;
 
     ---
     -- Pron
@@ -110,9 +105,11 @@ resource MiniResPor = open Prelude in {
 
     genderPron : Gender -> Pron -> Pron ;
     genderPron g pr = case pr.a of {
-      (Agr _ n pe) => {s = pr.s ; a = Agr g n pe}
+      (Agr _ n pe) => pr ** {a = Agr g n pe}
       } ;
 
+    ---
+    -- NP
     employNP : Case -> NP -> Str = \c,np ->
       let nps = np.s ! c in case nps.isClit of {
         True => nps.clit ;
@@ -146,12 +143,6 @@ resource MiniResPor = open Prelude in {
         _    => pretoA
       } ;
 
-    mkA = overload {
-      mkA : Str             -> Adjective         = regAdjective ;
-      mkA : Str             -> Bool -> Adjective = preAdjective ;
-      mkA : (_,_,_,_ : Str) -> Bool -> Adjective = mkAdjective ;
-      } ;
-
     preA : Adjective -> Adjective
       = \a -> {s = a.s ; isPre = True} ;
 
@@ -175,12 +166,12 @@ resource MiniResPor = open Prelude in {
 
     neg : Bool -> Str = \b -> case b of {True => [] ; False => "não"} ;
 
-    ser_V = mkV "ser" "sou" "é" "somos" "são"
+    ser_V = mkVerb "ser" "sou" "é" "somos" "são"
       "fui" "foi" "fomos" "foram" "seja" "sejamos" "sejam";
-    estar_V = mkV "estar" "estou" "está" "estamos" "estão"
+    estar_V = mkVerb "estar" "estou" "está" "estamos" "estão"
       "estive" "esteve" "estivemos" "estiveram"
       "esteja" "estejamos" "estejam" ;
-    ter_V = mkV "ter" "tenho" "tem" "temos" "tem"
+    ter_V = mkVerb "ter" "tenho" "tem" "temos" "tem"
       "tive" "teve" "tivemos" "tiveram"
       "tenha" "tenhamos" "tenham" ;
 
@@ -220,41 +211,11 @@ resource MiniResPor = open Prelude in {
       _ => mkVerb inf inf inf inf inf inf inf inf inf inf inf inf
       } ;
 
-    mkV = overload {
-      mkV : Str -> Verb = smartVerb ;
-      mkV : (_,_,_,_,_,_,_,_,_,_,_,_ : Str) -> Verb = mkVerb ;
-      } ;
-
     Verb2 : Type = Verb ** {c : Case ; p : Str} ;
 
-    mkV2 = overload {
-      mkV2 : Str -> Verb2 =
-        \s   -> mkV s ** {c = Nom ; p = []} ;
-      mkV2 : Str -> Case -> Verb2 =
-        \s,c -> mkV s ** {c = c ; p = []} ;
-      mkV2 : Str -> Str -> Verb2 =
-        \s,p -> mkV s ** {c = Nom ; p = p} ;
-      mkV2 : Str  -> Case -> Str -> Verb2 =
-        \s,c,p -> mkV s ** {c = c ; p = p} ;
-      mkV2 : Verb -> Verb2 =
-        \v -> v ** {c = Nom ; p = []} ;
-      mkV2 : Verb -> Case -> Verb2 =
-        \v,c -> v ** {c = c ; p = []} ;
-      mkV2 : Verb -> Str -> Verb2 =
-        \v,p -> v ** {c = Nom ; p = p} ;
-      mkV2 : Verb -> Case -> Str -> Verb2 =
-        \v,c,p -> v ** {c = c ; p = p} ;
-      } ;
-
-    ---
-    -- Adverb
-    Adverb : Type = {s : Str} ;
-
-    mkAdv : Str -> Adverb = \s -> {s = s} ;
 
     ---
     -- Det
-    -- [ ] is this ok por port?
     adjDet : Adjective -> Number -> {s : Gender => Case => Str ; n : Number} =
       \adj,n -> {
         s = \\g,c => adj.s ! g ! n ;
@@ -266,17 +227,19 @@ resource MiniResPor = open Prelude in {
 
     ---
     -- Prep
-    Prep : Type = {s : genNumStr } ;
-    no_Prep : Prep = { s = table {
-                         Masc => table {
-                           Sg => "no" ;
-                           Pl => "nos"
-                           } ;
-                         Fem => table {
-                           Sg => "na" ;
-                           Pl => "nas"
-                           }
-                         } ;
+    Preposition : Type = {s : genNumStr } ;
+
+    no_Prep : Preposition = {
+      s = table {
+        Masc => table {
+          Sg => "no" ;
+          Pl => "nos"
+          } ;
+        Fem => table {
+          Sg => "na" ;
+          Pl => "nas"
+          }
+        } ;
       } ;
 
 } ;
