@@ -95,7 +95,8 @@ concrete MiniLexiconPor of MiniLexicon = MiniGrammarPor
   lin live_V   = mkV "viver" ;
   lin play_V   = mkV "jogar" ;
   lin run_V    = mkV "correr" ;
-  lin sleep_V  = mkV "dormir" ;
+  lin sleep_V = mkV "dormir" "durmo" "dorme" "dormimos" "dormem"
+        "dormi" "dormiu" "dormimos" "dormiram" "durma" "durmamos" "durmam" ;
   lin swim_V   = mkV "nadar" ;
   lin travel_V = mkV "viajar" ;
   lin walk_V   = mkV "andar" ;

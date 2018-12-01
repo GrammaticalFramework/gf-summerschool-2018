@@ -88,10 +88,14 @@ resource MiniResPor = open Prelude in {
       a = Agr Masc Sg Per1
       } ;
 
+    iFem_Pron : Pron = femPron iMasc_Pron ;
+
     youMascSg_Pron : Pron = {
       s = table {Nom => "você" ; Acc => "lhe"} ;
       a = Agr Masc Sg Per2
       } ;
+
+    youFemSg_Pron : Pron = femPron youMascSg_Pron ;
 
     weMasc_Pron : Pron = {
       s = table {Nom => "nós" ; Acc => "nos"} ;
@@ -103,9 +107,9 @@ resource MiniResPor = open Prelude in {
       a = Agr Masc Pl Per2
       } ;
 
-    genderPron : Gender -> Pron -> Pron ;
-    genderPron g pr = case pr.a of {
-      (Agr _ n pe) => pr ** {a = Agr g n pe}
+    femPron : Pron -> Pron ;
+    femPron pr = case pr.a of {
+      (Agr _ n pe) => pr ** {a = Agr Fem n pe}
       } ;
 
     ---
@@ -222,6 +226,7 @@ resource MiniResPor = open Prelude in {
         n = n
       } ;
 
+    unDet = adjDet (regAdjective []) Sg ;
     um_adjDet = mkAdjective "um" "uma" "uns" "umas" True ;
     o_adjDet = mkAdjective "o" "a" "os" "as" True ;
 
