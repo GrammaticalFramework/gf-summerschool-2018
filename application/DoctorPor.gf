@@ -37,7 +37,7 @@ lin
 
   actionFact person action = mkCl person action ;
   propertyFact person property = mkCl person property ;
-  
+
   isProfessionProperty profession = mkVP (mkNP a_Det profession) ;
   needProfessionProperty profession = mkVP need_V2 (mkNP a_Det profession) ;
   isAtPlaceProperty place = mkVP place.at ;
@@ -46,59 +46,65 @@ lin
   theProfessionPerson profession = mkNP the_Det profession ;
 
   iMascPerson = i_NP ;
-  iFemPerson = mkNP (lin Pron (R.genderPron R.Fem i_Pron)) ;
+  iFemPerson = mkNP (lin Pron R.iFem_Pron) ;
   youMascPerson = you_NP ;
-  youFemPerson = you_NP ;
+  youFemPerson = mkNP (lin Pron R.youFemSg_Pron) ;
   hePerson = he_NP ;
   shePerson = she_NP ;
 
+  lin
   goToAction place = mkVP (mkVP go_V) place.to ;
   stayAtAction place = mkVP (mkVP stay_V) place.at ;
   vaccinateAction person = mkVP vaccinate_V2 person ;
   examineAction person = mkVP examine_V2 person ;
-  takeSubstancAction substance = mkVP take_V2 substance ;
+  takeSubstanceAction substance = mkVP tomar_V2 substance ;
 
 -- end of what could be a functor
 --------------------------------
 
-  coughAction = mkVP (mkV "tossir") ;
+  coughAction = mkVP cough_V ;
   breatheAction = mkVP (mkV "respirar") ;
   vomitAction = mkVP (mkV "vomitar") ;
-  sleepAction = mkVP (mkV "dormir") ;
-  undressAction = mkVP take_V2 (mkNP thePl_Det (mkN "roupa")) ;
-  dressAction = mkVP put_V2 (mkNP thePl_Det (mkN "roupa")) ;
+  sleepAction = mkVP sleep_V ;
+  undressAction = mkVP tirar_V2 (mkNP thePl_Det roupa_N) ;
+  dressAction = mkVP put_V2 (mkNP thePl_Det roupa_N) ;
   eatAction = mkVP (mkV "comer") ;
   drinkAction = mkVP (mkV "beber") ;
   smokeAction = mkVP (mkV "fumar") ;
-  measureTemperatureAction = mkVP (mkV2 (mkV "medir"))
+  measureTemperatureAction = mkVP (mkV2 measure_V)
     (mkNP the_Det (mkN "temperatura corporal" R.Fem)) ;
-  measureBloodPressureAction = mkVP (mkV2 (mkV "medir"))
+  measureBloodPressureAction = mkVP (mkV2 measure_V)
     (mkNP the_Det (mkN "pressão sanguínea")) ;
-  
+
   hospitalPlace = {at = pAdv "no hospital" ; to = pAdv "para o hospital"} ;
   homePlace = {at = pAdv "em casa" ; to = pAdv "casa"} ;
   schoolPlace = {at = pAdv "na escola" ; to = pAdv "para a escola"} ;
   workPlace = {at = pAdv "no trabalho" ; to = pAdv "para o trabalho"} ;
 
   doctorProfession = mkCN (mkN "médico") ;
-  nurseProfession = mkCN (mkN "enfermeira") ;
+  nurseProfession = mkCN (mkN "enfermeiro") ;
   interpreterProfession = mkCN (mkN "intérprete") ;
 
-  bePregnantProperty = mkVP (mkA "grávida") ;
-  beIllProperty = mkVP (mkA "doente") ;
-  beWellProperty = mkVP (mkA "bem") ;
-  beDeadProperty = mkVP (mkA "morto") ;
+  bePregnantProperty = estarUseAP (mkA "grávido") ;
+  beIllProperty = estarUseAP (mkA "doente") ;
+  beWellProperty = estarUseAP (mkA "bem") ;
+  beDeadProperty = estarUseAP (mkA "morto") ;
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "alergia")) ;
   havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "dor")) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "filho")) ;
-  
-  feverIllness = mkNP a_Det (mkN "febre") ;
-  fluIllness = mkNP a_Det (mkN "gripe") ;
-  headacheIllness = mkNP a_Det (mkN "dor-de-cabeça") ;
-  diarrheaIllness = mkNP a_Det (mkN "diarreia") ;
+
+  oper
+    estarUseAP : A -> VP ;
+    estarUseAP a = UseAP a ** {verb = estar_V} ;
+
+  lin
+  feverIllness        = mkNP a_Det (mkN "febre") ;
+  fluIllness          = mkNP a_Det (mkN "gripe" R.Fem) ;
+  headacheIllness     = mkNP a_Det (mkN "dor-de-cabeça") ;
+  diarrheaIllness     = mkNP a_Det (mkN "diarreia") ;
   heartDiseaseIllness = mkNP a_Det (mkN "doença cardíaca") ;
-  lungDiseaseIllness = mkNP a_Det (mkN "doença pulmonar") ;
-  hypertensionIllness = mkNP (mkN "hipertensão") ;
+  lungDiseaseIllness  = mkNP a_Det (mkN "doença pulmonar") ;
+  hypertensionIllness = mkNP (mkN "hipertensão" R.Fem) ;
 
   alcoholSubstance = mkNP (mkN "álcool") ;
   medicineSubstance = mkNP a_Det (mkN "remédio") ;
@@ -107,11 +113,19 @@ lin
 oper
   pAdv : Str -> Adv = MiniParadigmsPor.mkAdv ;
 
-  stay_V = mkV "ficar" ;
-  need_V2 = mkV2 (mkV "precisar") ;
-  take_V2 = mkV2 (mkV "tomar") ;
-  put_V2 = mkV2 (mkV "pôr") ;
-  vaccinate_V2 = mkV2 (mkV "vacinar") ;
+  cough_V = mkV "tossir" "tusso" "tosse" "tossimos" "tossem"
+    "tossi" "tossiu" "tossimos" "tossiram" "tussa" "tussamos" "tussam" ;
   examine_V2 = mkV2 (mkV "examinar") ;
+  estar_V = lin V R.estar_V ;
+  measure_V = mkV "medir" "meço" "mede" "medimos" "medem"
+    "medi" "mediu" "medimos" "mediram" "meça" "meçamos" "meçam" ;
+  need_V2 = mkV2 (mkV "precisar") ;
+  put_V2 = mkV2 (mkV "pôr") ;
+  roupa_N = mkN "roupa" ;
+  stay_V = mkV "ficar" "fico" "fica" "ficamos" "ficam"
+    "fiquei" "ficou" "ficamos" "ficaram" "fique" "fiquemos" "fiquem" ;
+  tomar_V2 = mkV2 (mkV "tomar") ;
+  tirar_V2 = mkV2 (mkV "tirar") ;
+  vaccinate_V2 = mkV2 (mkV "vacinar") ;
 
 } ;

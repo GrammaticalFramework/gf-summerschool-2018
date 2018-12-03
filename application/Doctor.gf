@@ -45,7 +45,7 @@ fun
   stayAtAction       : Place -> Action ;
   vaccinateAction    : Person -> Action ;
   examineAction      : Person -> Action ;
-  takeSubstancAction : Substance -> Action ;
+  takeSubstanceAction : Substance -> Action ;
 
   coughAction     : Action ;
   breatheAction   : Action ;

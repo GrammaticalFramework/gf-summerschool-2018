@@ -1,3 +1,4 @@
+--# -path=.:../abstract
 concrete MiniGrammarEng of MiniGrammar = open MiniResEng, Prelude in {
 
 

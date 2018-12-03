@@ -54,7 +54,7 @@ lin
   stayAtAction place = mkVP (mkVP stay_V) place.at ;
   vaccinateAction person = mkVP vaccinate_V2 person ;
   examineAction person = mkVP examine_V2 person ;
-  takeSubstancAction substance = mkVP take_V2 substance ;
+  takeSubstanceAction substance = mkVP take_V2 substance ;
 
 -- end of what could be a functor
 --------------------------------
