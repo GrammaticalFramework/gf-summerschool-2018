@@ -37,19 +37,19 @@ resource MiniParadigmsPor = open
 
     mkV2 = overload {
       mkV2 : Str -> V2 =
-        \s   -> lin V2 (smartVerb s ** {c = Nom ; p = []}) ;
+        \s   -> lin V2 (smartVerb s ** {c = Acc ; p = []}) ;
       mkV2 : Str -> Case -> V2 =
         \s,c -> lin V2 (smartVerb s ** {c = c ; p = []}) ;
       mkV2 : Str -> Str -> V2 =
-        \s,p -> lin V2 (smartVerb s ** {c = Nom ; p = p}) ;
+        \s,p -> lin V2 (smartVerb s ** {c = Acc ; p = p}) ;
       mkV2 : Str  -> Case -> Str -> V2 =
         \s,c,p -> lin V2 (smartVerb s ** {c = c ; p = p}) ;
       mkV2 : V -> V2 =
-        \v -> lin V2 (v ** {c = Nom ; p = []}) ;
+        \v -> lin V2 (v ** {c = Acc ; p = []}) ;
       mkV2 : V -> Case -> V2 =
         \v,c -> lin V2 (v ** {c = c ; p = []}) ;
       mkV2 : V -> Str -> V2 =
-        \v,p -> lin V2 (v ** {c = Nom ; p = p}) ;
+        \v,p -> lin V2 (v ** {c = Acc ; p = p}) ;
       mkV2 : V -> Case -> Str -> V2 =
         \v,c,p -> lin V2 (v ** {c = c ; p = p}) ;
       } ;
