@@ -56,21 +56,21 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
       s = temp.s ++ pol.s ++ qcl.s ! pol.isPos ! temp.isPres
       } ;
 
-    QuestCl cl = cl ; -- WIP
+    QuestCl cl = cl ;
 
     PredVP np vp = let subj = (np.s ! Nom).obj ;
-                       obj = vp.compl ! np.a ;
-                       clit = vp.clit ;
+                       obj  = vp.compl ! np.a ;
+                       clit = vp.clit.s ;
                        verb = agrV vp.verb np.a
       in {
-        s = \\isPos,isPres => subj ++ clit ++ neg isPos ++ verb ! isPres ++ obj
+        s = \\isPos,isPres => subj ++ neg isPos ++ clit ++ verb ! isPres ++ obj
       } ;
 
     ImpVP vp = {
-      -- WIP what about other agreements?
+      -- WIP what about other agreements? no need for them in English
       s = table {
-        True  => vp.verb.s ! VImp SgPer2 ++ vp.clit ++ vp.compl ! (Agr Masc Sg Per3) ;
-        False => neg False ++ vp.clit ++
+        True  => vp.verb.s ! VImp SgPer2 ++ vp.clit.s ++ vp.compl ! (Agr Masc Sg Per3) ;
+        False => neg False ++ vp.clit.s ++
           vp.verb.s ! VImp SgPer2 ++ vp.compl ! (Agr Masc Sg Per3)
         }
       } ;
@@ -78,7 +78,7 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
     -- Verb
     UseV v = {
       verb = v ;
-      clit = [] ;
+      clit = emptyClit ;
       clitAgr = CAgrNo ;
       compl = \\_ => []
       } ;
@@ -86,30 +86,30 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
     ComplV2 v2 np = let nps = np.s ! v2.c in {
       verb = {s = v2.s} ;
       clit = nps.clit ;
-      clitAgr = case <nps.isClit,v2.c> of {
+      clitAgr = case <nps.clit.hasClit,v2.c> of {
         <True,Acc> => CAgr np.a ;
         _          => CAgrNo
         } ;
       compl = \\_ => v2.p ++ nps.obj
       } ;
 
-    UseNP np = { -- WIP
+    UseNP np = {
       verb = ser_V ;
-      clit = [] ;
+      clit = emptyClit ;
       clitAgr = CAgrNo ;
       compl = \\_ => (np.s ! Nom).obj
       } ;
 
     UseAdv adv = {
       verb = estar_V ;
-      clit = [] ;
+      clit = emptyClit ;
       clitAgr = CAgrNo ;
       compl = \\_ => adv.s
       } ;
 
     UseAP ap = {
       verb = ser_V ;
-      clit = [] ;
+      clit = emptyClit ;
       clitAgr = CAgrNo ;
       compl = \\agr => case agr of {
         Agr g n _ => ap.s ! g ! n
@@ -120,32 +120,33 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
 
     -- Noun
     DetCN det cn = {
-      s = \\c => {clit = [] ;
-                  obj = det.s ! cn.g ! c ++ cn.s ! det.n ;
-                  isClit = False
+      s = \\c => {clit = emptyClit ;
+                  obj = det.s ! cn.g ! c ++ cn.s ! det.n
         } ;
       a = Agr cn.g det.n Per3 ;
       } ;
 
     UsePN pn = {
-      s = \\_ => {clit = [] ; obj = pn.s ; isClit = False} ;
+      s = \\_ => {clit = emptyClit ; obj = pn.s } ;
       a = Agr pn.g Sg Per3
       } ;
 
     UsePron p = {
       s = table {
-        Nom => {clit = [] ;
-                obj = p.s ! Nom ;
-                isClit = False} ;
-        Acc => {clit = p.s ! Acc ;
-                obj = [] ;
-                isClit = True}
+        Nom => {
+          clit = emptyClit ;
+          obj = p.s ! Nom
+          } ;
+        Acc => {
+          clit = {s = p.s ! Acc ; hasClit = True} ;
+          obj = []
+          }
         } ;
       a = p.a
       } ;
 
     MassNP cn = {
-      s = \\_ => {clit = [] ; obj = cn.s ! Sg ; isClit = False} ;
+      s = \\_ => {clit = emptyClit ; obj = cn.s ! Sg} ;
       a = Agr cn.g Sg Per3
       } ;
 

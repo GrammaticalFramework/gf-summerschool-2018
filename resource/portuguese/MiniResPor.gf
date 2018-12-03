@@ -23,10 +23,10 @@ resource MiniResPor = open Prelude in {
   oper
     genNumStr : Type = Gender => Number => Str ;
 
-    ---
+     ---
     -- Noun
-    NP = {
-      s : Case => {clit,obj : Str ; isClit : Bool} ;
+    NP : Type = {
+      s : Case => {clit : Clit ; obj : Str} ;
       a : Agreement
       } ;
 
@@ -115,8 +115,8 @@ resource MiniResPor = open Prelude in {
     ---
     -- NP
     employNP : Case -> NP -> Str = \c,np ->
-      let nps = np.s ! c in case nps.isClit of {
-        True => nps.clit ;
+      let nps = np.s ! c in case nps.clit.hasClit of {
+        True => nps.clit.s ;
         _    => nps.obj
       } ;
 
@@ -152,9 +152,13 @@ resource MiniResPor = open Prelude in {
 
     ---
     -- Verb
+    Clit : Type = {s : Str ; hasClit : Bool} ;
+
+    emptyClit : Clit = {s = [] ; hasClit = False} ;
+
     VP = {
       verb : Verb ;
-      clit : Str ;
+      clit : Clit ;
       clitAgr : ClitAgr ;
       compl : Agreement => Str ;
       } ;
