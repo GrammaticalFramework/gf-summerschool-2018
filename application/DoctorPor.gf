@@ -98,7 +98,7 @@ lin
     estarUseAP a = UseAP a ** {verb = estar_V} ;
 
   lin
-  feverIllness        = mkNP a_Det (mkN "febre") ;
+  feverIllness        = mkNP a_Det (mkN "febre" R.Fem) ;
   fluIllness          = mkNP a_Det (mkN "gripe" R.Fem) ;
   headacheIllness     = mkNP a_Det (mkN "dor-de-cabeça") ;
   diarrheaIllness     = mkNP a_Det (mkN "diarreia") ;
@@ -119,13 +119,15 @@ oper
   estar_V = lin V R.estar_V ;
   measure_V = mkV "medir" "meço" "mede" "medimos" "medem"
     "medi" "mediu" "medimos" "mediram" "meça" "meçamos" "meçam" ;
-  need_V2 = mkV2 (mkV "precisar") ;
-  put_V2 = mkV2 (mkV "pôr") ;
+  need_V2 = mkV2 (mkV "precisar") "de" ;
+  put_V2 = mkV2 (mkV "pôr" "ponho" "põe" "pomos" "põem"
+    "pus" "pôs" "pusemos" "puseram" "ponha" "ponhamos" "ponham") ;
   roupa_N = mkN "roupa" ;
   stay_V = mkV "ficar" "fico" "fica" "ficamos" "ficam"
     "fiquei" "ficou" "ficamos" "ficaram" "fique" "fiquemos" "fiquem" ;
   tomar_V2 = mkV2 (mkV "tomar") ;
   tirar_V2 = mkV2 (mkV "tirar") ;
   vaccinate_V2 = mkV2 (mkV "vacinar") ;
+
 
 } ;
