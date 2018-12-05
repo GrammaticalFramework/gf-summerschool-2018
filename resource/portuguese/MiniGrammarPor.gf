@@ -22,7 +22,7 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
 
     Pron = MiniResPor.Pron ;
 
-    Det = {s : Gender => Case => Str ; n : Number} ;
+    Det  = {s : Gender => Case => Str ; n : Number} ;
     Conj = {s : Str} ;
     Prep = Preposition ;
 
@@ -140,6 +140,10 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
         Acc => {
           clit = {s = p.s ! Acc ; hasClit = True} ;
           obj = []
+          } ;
+        Dat => {
+          clit = emptyClit ;
+          obj = p.s ! Dat
           }
         } ;
       a = p.a
@@ -193,20 +197,11 @@ concrete MiniGrammarPor of MiniGrammar = open MiniResPor, Prelude in {
 
     i_Pron = iMasc_Pron ;
     youSg_Pron = youMascSg_Pron ;
-    he_Pron = {
-      s = table {Nom => "ele" ; Acc => "o"} ;
-      a = Agr Masc Sg Per3
-      } ;
-    she_Pron = {
-      s = table {Nom => "ela" ; Acc => "a"} ;
-      a = Agr Fem Sg Per3
-      } ;
+    he_Pron = mkPron "ele" "o" "lhe" Masc Sg Per3 ;
+    she_Pron = mkPron "ela" "a" "lhe" Fem Sg Per3 ;
     we_Pron    = weMasc_Pron ;
     youPl_Pron = youMascPl_Pron ;
-    they_Pron = {
-      s = table {Nom => "eles" ; Acc => "os"} ;
-      a = Agr Masc Pl Per2
-      } ;
+    they_Pron = mkPron "eles" "os" "lhes" Masc Pl Per2 ;
 
     have_V2 = ter_V ** {c = Nom ; p = []} ;
 
