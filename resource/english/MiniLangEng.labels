@@ -1,0 +1,4 @@
+UseCl, UseQCl, ImpVP {"not"} PART neg head
+UseAP, UseAdv, UseNP {"is","are","am","was","were","been","be"} VERB cop head
+PredVP {"has","had","have","do","does"} AUX aux head
+ImpVP {"do"} AUX aux head

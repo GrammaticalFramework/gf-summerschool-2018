@@ -1,0 +1,20 @@
+AdjCN	amod head
+AdvVP 	head advmod
+ComplV2	head dobj
+CoordS	cc head conj
+DetCN	det head
+PredVP	nsubj head
+PrepNP	case head
+UseCl	empty empty head
+UseQCl	empty empty head
+UttImpSg      emoty head
+
+A	      ADJ
+Conj	      CONJ
+Det	      DET
+N	      NOUN
+PN	      PROPN
+Prep	      ADP
+Pron	      PRON
+V	      VERB
+V2	      VERB
