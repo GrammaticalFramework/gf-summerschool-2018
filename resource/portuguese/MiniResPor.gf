@@ -5,7 +5,7 @@ resource MiniResPor = open Prelude in {
 
     Number = Sg | Pl ;
 
-    Case   = Nom | Acc ;
+    Case   = Nom | Acc | Dat ;
 
     Person = Per1 | Per2 | Per3 ;
 
@@ -23,10 +23,10 @@ resource MiniResPor = open Prelude in {
   oper
     genNumStr : Type = Gender => Number => Str ;
 
-    ---
+     ---
     -- Noun
-    NP = {
-      s : Case => {clit,obj : Str ; isClit : Bool} ;
+    NP : Type = {
+      s : Case => {clit : Clit ; obj : Str} ;
       a : Agreement
       } ;
 
@@ -83,29 +83,23 @@ resource MiniResPor = open Prelude in {
     -- Pron
     Pron : Type = {s : Case => Str ; a : Agreement} ;
 
-    iMasc_Pron : Pron = {
-      s = table {Nom => "eu" ; Acc => "me"} ;
-      a = Agr Masc Sg Per1
+    mkPron : (_,_,_ :Str) -> Gender -> Number -> Person -> Pron ;
+    mkPron eu me mim g n p = {
+      s = table {Nom => eu ; Acc => me ; Dat => mim} ;
+      a = Agr g n p
       } ;
+
+    iMasc_Pron : Pron = mkPron "eu" "me" "mim" Masc Sg Per1 ;
 
     iFem_Pron : Pron = femPron iMasc_Pron ;
 
-    youMascSg_Pron : Pron = {
-      s = table {Nom => "você" ; Acc => "lhe"} ;
-      a = Agr Masc Sg Per2
-      } ;
+    youMascSg_Pron : Pron = mkPron "você" "lhe" "lhe" Masc Sg Per2 ;
 
     youFemSg_Pron : Pron = femPron youMascSg_Pron ;
 
-    weMasc_Pron : Pron = {
-      s = table {Nom => "nós" ; Acc => "nos"} ;
-      a = Agr Masc Pl Per1
-      };
+    weMasc_Pron : Pron = mkPron "nós" "nos" "nós" Masc Pl Per1 ;
 
-    youMascPl_Pron : Pron = {
-      s = table {Nom => "vocês" ; Acc => "lhes"} ;
-      a = Agr Masc Pl Per2
-      } ;
+    youMascPl_Pron : Pron = mkPron "vocês" "lhes" "lhes" Masc Pl Per2 ;
 
     femPron : Pron -> Pron ;
     femPron pr = case pr.a of {
@@ -115,8 +109,8 @@ resource MiniResPor = open Prelude in {
     ---
     -- NP
     employNP : Case -> NP -> Str = \c,np ->
-      let nps = np.s ! c in case nps.isClit of {
-        True => nps.clit ;
+      let nps = np.s ! c in case nps.clit.hasClit of {
+        True => nps.clit.s ;
         _    => nps.obj
       } ;
 
@@ -152,9 +146,13 @@ resource MiniResPor = open Prelude in {
 
     ---
     -- Verb
+    Clit : Type = {s : Str ; hasClit : Bool} ;
+
+    emptyClit : Clit = {s = [] ; hasClit = False} ;
+
     VP = {
       verb : Verb ;
-      clit : Str ;
+      clit : Clit ;
       clitAgr : ClitAgr ;
       compl : Agreement => Str ;
       } ;

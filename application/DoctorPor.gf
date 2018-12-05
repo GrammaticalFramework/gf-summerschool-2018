@@ -18,7 +18,7 @@ lincat
   Fact = Cl ;
   Action = VP ;
   Property = VP ;
-  Profession = CN ;
+  Profession = {s : R.Gender => CN} ;
   Person = NP ;
   Place = {at,to : Adv} ;
   Substance = NP ;
@@ -38,12 +38,20 @@ lin
   actionFact person action = mkCl person action ;
   propertyFact person property = mkCl person property ;
 
-  isProfessionProperty profession = mkVP (mkNP a_Det profession) ;
-  needProfessionProperty profession = mkVP need_V2 (mkNP a_Det profession) ;
+  isProfessionProperty profession = lin VP {
+    verb = R.ser_V ;
+    clit = R.emptyClit ;
+    clitAgr = R.CAgrNo ;
+    compl = \\agr => case agr of {
+      R.Agr g n _ => (profession.s ! g).s ! n
+      }
+    } ;
+
+  needProfessionProperty profession = mkVP need_V2 (mkNP a_Det (profession.s ! R.Masc)) ;
   isAtPlaceProperty place = mkVP place.at ;
   haveIllnessProperty illness = mkVP have_V2 illness ;
 
-  theProfessionPerson profession = mkNP the_Det profession ;
+  theProfessionPerson profession = mkNP the_Det (profession.s ! R.Masc) ;
 
   iMascPerson = i_NP ;
   iFemPerson = mkNP (lin Pron R.iFem_Pron) ;
@@ -77,13 +85,13 @@ lin
     (mkNP the_Det (mkN "pressão sanguínea")) ;
 
   hospitalPlace = {at = pAdv "no hospital" ; to = pAdv "para o hospital"} ;
-  homePlace = {at = pAdv "em casa" ; to = pAdv "casa"} ;
+  homePlace = {at = pAdv "em casa" ; to = pAdv "para casa"} ;
   schoolPlace = {at = pAdv "na escola" ; to = pAdv "para a escola"} ;
   workPlace = {at = pAdv "no trabalho" ; to = pAdv "para o trabalho"} ;
 
-  doctorProfession = mkCN (mkN "médico") ;
-  nurseProfession = mkCN (mkN "enfermeiro") ;
-  interpreterProfession = mkCN (mkN "intérprete") ;
+  doctorProfession      = mkProfession "médico" ;
+  nurseProfession       = mkProfession "enfermeiro" ;
+  interpreterProfession = mkProfession "intérprete" ;
 
   bePregnantProperty = estarUseAP (mkA "grávido") ;
   beIllProperty = estarUseAP (mkA "doente") ;
@@ -97,8 +105,12 @@ lin
     estarUseAP : A -> VP ;
     estarUseAP a = UseAP a ** {verb = estar_V} ;
 
+    mkProfession : Str -> Profession ;
+    mkProfession p = let p : R.Adjective = mkA p
+      in lin Profession {s = \\g => lin CN {s = p.s ! g ; g = g} } ;
+
   lin
-  feverIllness        = mkNP a_Det (mkN "febre") ;
+  feverIllness        = mkNP a_Det (mkN "febre" R.Fem) ;
   fluIllness          = mkNP a_Det (mkN "gripe" R.Fem) ;
   headacheIllness     = mkNP a_Det (mkN "dor-de-cabeça") ;
   diarrheaIllness     = mkNP a_Det (mkN "diarreia") ;
@@ -119,13 +131,15 @@ oper
   estar_V = lin V R.estar_V ;
   measure_V = mkV "medir" "meço" "mede" "medimos" "medem"
     "medi" "mediu" "medimos" "mediram" "meça" "meçamos" "meçam" ;
-  need_V2 = mkV2 (mkV "precisar") ;
-  put_V2 = mkV2 (mkV "pôr") ;
+  need_V2 = mkV2 (mkV "precisar") "de" ;
+  put_V2 = mkV2 (mkV "pôr" "ponho" "põe" "pomos" "põem"
+    "pus" "pôs" "pusemos" "puseram" "ponha" "ponhamos" "ponham") ;
   roupa_N = mkN "roupa" ;
   stay_V = mkV "ficar" "fico" "fica" "ficamos" "ficam"
     "fiquei" "ficou" "ficamos" "ficaram" "fique" "fiquemos" "fiquem" ;
   tomar_V2 = mkV2 (mkV "tomar") ;
   tirar_V2 = mkV2 (mkV "tirar") ;
   vaccinate_V2 = mkV2 (mkV "vacinar") ;
+
 
 } ;
