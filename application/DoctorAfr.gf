@@ -85,7 +85,7 @@ lin
   beWellProperty = mkVP (mkA "gesond") ;
   beDeadProperty = mkVP (mkA "dood") ;
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergie" "allergieë")) ;
-  havePainsProperty = mkVP have_V2 (mkNP aSg_Det (mkN "pyn")) ;
+  havePainsProperty = mkVP have_V2 (mkNP a_Det (mkN "pyn")) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "kind" "kinders")) ;
 
   feverIllness = MassNP (mkN "koors") ;
