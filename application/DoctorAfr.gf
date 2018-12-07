@@ -63,8 +63,8 @@ lin
   breatheAction = mkVP (mkV "haal" "asem") ;
   vomitAction = mkVP (mkV "gooi" "op") ;
   sleepAction = mkVP (mkV "slaap") ;
-  undressAction = mkVP (mkVP take_V2 (mkNP thePl_Det (mkN "kleer"))) (pAdv "uit") ;
-  dressAction = mkVP (mkVP put_V2 (mkNP thePl_Det (mkN "kleer"))) (pAdv "aan") ;
+  undressAction = mkVP (mkV2 (mkV "trek" "uit")) (mkNP thePl_Det (mkN "kleed" "klere")) ;
+  dressAction = mkVP (mkV2 (mkV "trek" "aan")) (mkNP thePl_Det (mkN "kleed" "klere")) ;
   eatAction = mkVP (mkV "eet") ;
   drinkAction = mkVP (mkV "drink") ;
   smokeAction = mkVP (mkV "rook") ;
@@ -84,8 +84,8 @@ lin
   beIllProperty = mkVP (mkA "siek") ;
   beWellProperty = mkVP (mkA "gesond") ;
   beDeadProperty = mkVP (mkA "dood") ;
-  haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergie")) ;
-  havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "pyn")) ;
+  haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergie" "allergieë")) ;
+  havePainsProperty = mkVP have_V2 (mkNP a_Det (mkN "pyn")) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "kind" "kinders")) ;
 
   feverIllness = MassNP (mkN "koors") ;

@@ -123,10 +123,11 @@ concrete MiniGrammarAfr of MiniGrammar = open Prelude,ResAfr in {
         let
           verbapos = (vp.v).s!VPres ; -- kan
           verbaneg = (vp.v).s!VInfa ;
-          verbb = case (vp.v).vtype of {
+          verbbpos = case (vp.v).vtype of {
             VAux => vp.compV!VInfa ; -- (kan) sien
             _ => (vp.v).p  -- (kyk) op
           } ;
+          verbbneg = vp.compV!VInfa ;
           obja = vp.n2a ;
           objb = vp.n2b ;
           subcl = vp.subCl ;
@@ -136,8 +137,8 @@ concrete MiniGrammarAfr of MiniGrammar = open Prelude,ResAfr in {
                                        TNeg => putNie (fillNeg2Neg vp.finNie) } ;
         in
           table {
-            TPos => verbapos ++ obja ++ neg1!TPos ++ adv ++ objb ++ verbb ++ subcl ++ neg2!TPos ;
-            TNeg => "moenie" ++ obja ++ neg1!TNeg ++ adv ++ objb ++ verbb ++ verbaneg ++ subcl ++ neg2!TNeg
+            TPos => verbapos ++ obja ++ neg1!TPos ++ adv ++ objb ++ verbbpos ++ subcl ++ neg2!TPos ;
+            TNeg => "moenie" ++ obja ++ adv ++ objb ++ verbbneg ++ verbaneg ++ subcl ++ neg2!TNeg
           }
     } ;
 
