@@ -115,7 +115,7 @@ lin
   headacheIllness     = mkNP a_Det (mkN "dor-de-cabeça") ;
   diarrheaIllness     = mkNP a_Det (mkN "diarreia") ;
   heartDiseaseIllness = mkNP a_Det (mkN "doença cardíaca") ;
-  lungDiseaseIllness  = mkNP a_Det (mkN "doença pulmonar") ;
+  lungDiseaseIllness  = mkNP a_Det (mkN "doença pulmonar" R.Fem) ;
   hypertensionIllness = mkNP (mkN "hipertensão" R.Fem) ;
 
   alcoholSubstance = mkNP (mkN "álcool") ;

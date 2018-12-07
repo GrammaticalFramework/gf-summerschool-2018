@@ -78,8 +78,8 @@ lin
   nurseProfession = mkCN (mkN "kalkaalisada") ;
   interpreterProfession = mkCN (mkN "turjumaan") ;
 
-  bePregnantProperty = mkVP (mkA "pregnant") ;
-  beIllProperty = mkVP (mkA "uur") ;
+  bePregnantProperty = mkVP (mkA "uur") ;
+  beIllProperty = mkVP (mkA "xanuunsan") ;
   beWellProperty = mkVP (mkA "fiic") ;
 --  beDeadProperty = mkVP (mkA "dead") ;
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "xasaasiyad")) ;
