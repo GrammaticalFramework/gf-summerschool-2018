@@ -60,54 +60,54 @@ lin
 
   coughAction = mkVP (mkV "husten") ;
   breatheAction = mkVP (mkV "atmen") ;
-  vomitAction = mkVP (mkV "erbrechen") ;
-  sleepAction = mkVP (mkV "schlafen") ;
-  undressAction = mkVP (reflV (mkV "entkleiden") accusative) ;
-  dressAction = mkVP (reflV (mkV "anziehen") accusative) ;
-  eatAction = mkVP (mkV "essen") ;
-  drinkAction = mkVP (mkV "trinken") ;
+  vomitAction = mkVP (fixprefixV "er" brechen_V) ;
+  sleepAction = mkVP schlafen_V ;
+  undressAction = mkVP (reflV (fixprefixV "ent" (mkV "kleiden")) accusative) ;
+  dressAction = mkVP (reflV (mkV "an" ziehen_V) accusative) ;
+  eatAction = mkVP essen_V ;
+  drinkAction = mkVP trinken_V ;
   smokeAction = mkVP (mkV "rauchen") ;
-  measureTemperatureAction = mkVP take_V2 (mkNP the_Det (mkN "temp")) ;
-  measureBloodPressureAction = mkVP (mkV2 (mkV "mäter")) (mkNP the_Det (mkN "blotryck" neuter)) ;
+  measureTemperatureAction = mkVP (mkV2 messen_V) (mkNP the_Det (mkN "Fieber" neuter)) ;
+  measureBloodPressureAction = mkVP (mkV2 messen_V) (mkNP the_Det (mkN "Blutdruck")) ;
 
-  hospitalPlace = {at = pAdv "på sjukhuset" ; to = pAdv "till sjukhuset"} ;
-  homePlace = {at = pAdv "hemma" ; to = pAdv "hem"} ;
-  schoolPlace = {at = pAdv "i skolan" ; to = pAdv "till skolan"} ;
-  workPlace = {at = pAdv "på jobbet" ; to = pAdv "till jobbet"} ;
+  hospitalPlace = {at = pAdv "im Krankenhaus" ; to = pAdv "in das Krankenhaus"} ;
+  homePlace = {at = pAdv "zu Hause" ; to = pAdv "nach Hause"} ;
+  schoolPlace = {at = pAdv "in der Schule" ; to = pAdv "in die Schule"} ;
+  workPlace = {at = pAdv "auf Arbeit" ; to = pAdv "zur Arbeit"} ;
 
-  doctorProfession = mkCN (mkN "läkare" "läkare" masculine) ;
-  nurseProfession = mkCN (mkN "sjuksköterska") ;
-  interpreterProfession = mkCN (mkN "tolk") ;
+  doctorProfession = mkCN (mkN "Arzt") ;
+  nurseProfession = mkCN ((mkN "Krankenpfleger") | (mkN "Pfleger") | (mkN "Krankenschwester") ) ;
+  interpreterProfession = mkCN (mkN "Übersetzer") ;
 
-  bePregnantProperty = mkVP (mkA "gravid") ;
-  beIllProperty = mkVP (mkA "sjuk") ;
-  beWellProperty = mkVP (mkA "frisk") ;
-  beDeadProperty = mkVP (mkA "död") ;
-  haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergi")) ;
-  havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "smärta")) ;
-  haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "Kind" neuter)) ;
+  bePregnantProperty = mkVP (mkA "schwanger") ;
+  beIllProperty = mkVP (mkA "krank") ;
+  beWellProperty = mkVP (mkA "gesund") ;
+  beDeadProperty = mkVP (mkA "tot") ;
+  haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "Allergie")) ;
+  havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "Schmerz" "Schmerzen" masculine)) ;
+  haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "Kind" "Kinder" neuter)) ;
   
-  feverIllness = mkNP (mkN "feber") ;
-  fluIllness = mkNP a_Det (mkN "förkylning") ;
+  feverIllness = mkNP (mkN "Fieber") ;
+  fluIllness = mkNP (the_Det|a_Det) (mkN "Grippe") ;
   headacheIllness = mkNP (mkN "Kopfschmerzen") ;
   diarrheaIllness = mkNP (mkN "Durchfall") ;
-  heartDiseaseIllness = mkNP aPl_Det (mkN "hjärtsjukdom") ;
-  lungDiseaseIllness = mkNP aPl_Det (mkN "lungsjukdom") ;
-  hypertensionIllness = mkNP (mkN "hypertoni") ;
+  heartDiseaseIllness = mkNP aPl_Det (mkN "Herzerkrankung") ;
+  lungDiseaseIllness = mkNP aPl_Det (mkN "Lungenerkrankung") ;
+  hypertensionIllness = mkNP (mkN "Bluthochdruck") ;
 
-  alcoholSubstance = mkNP (mkN "alkohol") ;
-  medicineSubstance = mkNP aPl_Det (mkN "läkemedel") ;
-  drugsSubstance = mkNP aPl_Det (mkN "drog") ;
+  alcoholSubstance = mkNP (mkN "Alkohol") ;
+  medicineSubstance = mkNP aPl_Det (mkN "Medikament") ;
+  drugsSubstance = mkNP aPl_Det (mkN "Droge") ;
 
 oper
   pAdv : Str -> Adv = ParadigmsGer.mkAdv ;
 
-  go_V = gehen_V ;
+  go_V = seinV gehen_V ;
   stay_V = bleiben_V ;
   need_V2 = mkV2 (mkV "brauchen") ;
   take_V2 = mkV2 nehmen_V ;
   put_V2 = mkV2 (mkV "setzen") ;
   vaccinate_V2 = mkV2 (mkV "impfen") ;
-  examine_V2 = mkV2 (mkV "untersuchen") ;
+  examine_V2 = mkV2 (fixprefixV "unter" (mkV "suchen")) ;
 
 }
