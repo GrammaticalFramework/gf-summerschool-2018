@@ -475,11 +475,11 @@ oper
               x        => x } ;
 
   prepTable : Preposition => Prep = table {
-    ku => mkPrep "ku" "igu" "kugu" "nagu" "idinku" "lagu" ;
-    ka => mkPrep "ka" "iga" "kaa" "naga" "idinka" "laga" ;
-    la => mkPrep "la" "ila" "kula" "nala" "idinla" "lala" ;
-    u  => mkPrep "u" "ii" "kuu" "noo" "idiin" "loo" ;
-    noPrep => mkPrep [] "i" "ku" "na" "idin" "la"
+    ku => mkPrep "ku" "igu" "kugu" "nagu" "idinku" "lagu" ; -- Object pronouns fused with ku
+    ka => mkPrep "ka" "iga" "kaa" "naga" "idinka" "laga" ;  -- Object pronouns fused with ka
+    la => mkPrep "la" "ila" "kula" "nala" "idinla" "lala" ; -- Object pronouns fused with la
+    u  => mkPrep "u" "ii" "kuu" "noo" "idiin" "loo" ;       -- Object pronouns fused with u
+    noPrep => mkPrep [] "i" "ku" "na" "idin" "la" -- Just object pronouns
   } ;
 
    showPrep : Preposition -> Str = \p ->
