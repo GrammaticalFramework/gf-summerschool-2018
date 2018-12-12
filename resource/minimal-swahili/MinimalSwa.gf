@@ -60,6 +60,7 @@ lin
 
   read_V = {root = "som"} ;
   fall_V = {root = "anguk"} ;
+  see_V = {root = "on"} ;
 
   i_NP     = {s = [] ; a = APron Sg Per1} ;
   youSg_NP = {s = [] ; a = APron Sg Per2} ;
@@ -131,7 +132,10 @@ oper
     APron Pl Per1 => mkClitic "tu" ;
     APron Pl Per2 => mkClitic "wa" ;
     APron Pl Per3 => mkClitic "wa" ;
-    AClass C0102 n => mkClitics "m" "wa" n ;
+    AClass C0102 n => case n of {
+      Sg => pre {("a" | "o") => mkClitic "mw" ; _ => mkClitic "m"} ;
+      _  => mkClitic "wa"
+      } ;
     AClass C0304 n => mkClitics "u" "ya" n ;
     AClass C0506 n => mkClitics "li" "ya" n ;
     AClass C0708 n => mkClitics "ki" "vi" n ;

@@ -28,6 +28,7 @@ lin
 
   read_V = mkV2 IrregEng.read_V ;
   fall_V = mkV2 IrregEng.fall_V ;
+  see_V = mkV2 IrregEng.see_V ;
 
   i_NP  = mkNP i_Pron ;
   youSg_NP  = mkNP youSg_Pron ;

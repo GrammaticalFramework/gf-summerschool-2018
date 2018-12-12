@@ -12,6 +12,7 @@ fun
 
   read_V : V ; -- soma
   fall_V : V ; -- anguka 
+  see_V : V ; -- ona 
 
   i_NP     : NP ;
   youSg_NP : NP ;
