@@ -1,16 +1,15 @@
 --# -path=.:../prelude:../abstract:../common
 
-concrete LexiconCgg of Lexicon = CatCgg ** 
-  open ParadigmsCgg, ResCgg, Prelude in {
+concrete MiniLexiconNyn of MiniLexicon = MiniGrammarNyn **
+  open
+    MiniParadigmsNyn, MiniResNyn, Prelude
+  in {
 
 lin
   
   burn_V  = mkV "sya" ;
   die_V   = mkV "fa" ;
   fly_V   = mkV "guruka" ;
-  run_V   = mkV "iruka" ;
-  sleep_V = mkV "byama" ;
-  walk_V  = mkV "tabula" ;
   
   bird_N   = mkN "ekinyonyi" KI_BI ;
   boat_N   = mkN "eryato" RI_MA ;
@@ -36,18 +35,18 @@ lin
   bad_A    = mkAdjective "bi" False ; --False means the adjective is a stem and comes after the complet noun
   beautiful_A = mkAdjective "rungi" False; 
   far_Adv = mkAdv "hare";
-  now_Adv = mkAdv "hati";
-  today_Adv = mkAdv "erizooba";
-  bite_V2 = mkV2 "ruma";
-  break_V2 = mkV2 "henda";
-  buy_V2 = mkV2 "gura";
-  close_V2 = mkV2 "kinga";
-  count_V2 = mkV2 "bara";
-  cut_V2 = mkV2 "shara";
-  do_V2 = mkV2 "kora";
-  drink_V2 = mkV2 "nywa";
-  eat_V2 = mkV2 "rya";
-  fear_V2 = mkV2 "tiina";
+  now_Adv = mkAdv "hati" AgrNo;
+  today_Adv = mkAdv "erizooba" AgrNo;
+  bite_V2 = mkV2 "rum";
+  break_V2 = mkV2 "hend";
+  buy_V2 = mkV2 "gur";
+  close_V2 = mkV2 "king";
+  count_V2 = mkV2 "bar";
+  cut_V2 = mkV2 "shar";
+  do_V2 = mkV2 "kor";
+  drink_V2 = mkV2 "nyw";
+  eat_V2 = mkV2 "ry";
+  fear_V2 = mkV2 "tiin";
   airplane_N = mkN "enyonyi" N_N ;
   animal_N = mkN "enyamaishwa" N_N ;
   apple_N = mkN "apple"  ZERO_ZERO ;
@@ -77,8 +76,8 @@ lin
 
 lin
 
-  john_PN = mkPN "Yohana" MU_BA Sg;
-  paris_PN = mkPN "Paris" KI_BI Sg; --Noun class for places???
+  john_PN = mkPN "Yohana" (AgP3 Sg MU_BA) False;
+  paris_PN = mkPN "Paris" (AgP3 Sg KI_BI) True; --Noun class for places???
  
   --Adjectives
 
@@ -96,23 +95,20 @@ lin
   
   
   
-  break_V2 = mkV2 "kuhenda" False; --: V2 ;
-  buy_V2   = mkV2 "kugura" False;  --: V2 ;
+  break_V2 = mkV2 "hend"; --: V2 ;
+  buy_V2   = mkV2 "gur" ;  --: V2 ;
   
   clean_A = mkAdjective "yonjo" False; --: A ;
   --clever_A : mkAdjective ;
   
   cold_A = mkAdjective "rikufuka" False; --: A ;
-  come_V = mkV "kwija" False;
+  come_V = mkV "kwij";
  
- 
-  drink_V2 = mkV2 "kunywa" False; --: V2 ;
-  eat_V2 = mkV2 "kurya" False; --: V2 ;
-  find_V2 = mkV2 "kubona" False; --: V2 ; -- many words; kureeba, kubóna,kushanga, kumamya,kujumbura
+  find_V2 = mkV2 "bon" ; --: V2 ; -- many words; kureeba, kubóna,kushanga, kumamya,kujumbura
   
  
   good_A =mkAdjective "rungi" False; --: A ;
-  go_V = mkV "kuza" False; --: V ; -- Many words: kuza, kuraba,kutoora, kugyenda=go away, kushuma=go down
+  go_V = mkV "gyend"; --: V ; -- Many words: kuza, kuraba,kutoora, kugyenda=go away, kushuma=go down
   
   --green_A =mkAdjective : A ; No word for green
   heavy_A = mkAdjective "rikuremeera" False; --: A ; --notice ri as a verb is
@@ -121,34 +117,36 @@ lin
   
   
 
-  jump_V = mkV "kuguruka" False;
-  kill_V2 = mkV2 "kwita" False; --: V2 ;
+  jump_V = mkV "guruk" ;
+  kill_V2 = mkV2 "it"; --: V2 ;
 
-  live_V = mkV "Kúbaho" False; --many: kutuura i.e. live somewhere, stay = kuráàra
-  love_V2 = mkV2 "kukûnda" False; --: V2 ;
+  live_V = mkV "tuur" ; --manyF: kutuura i.e. live somewhere, stay = kuráàra
+  love_V2 = mkV2 "kûnd"; --: V2 ;
 
   new_A = mkAdjective "sya" False; --: A ;
-  now_Adv =mkAdv "hati"; --: Adv ;
+  --now_Adv =mkAdv "hati"; --: Adv ;
   old_A = mkAdjective "kúru" False; --: A ;
   
-  play_V = mkV "Kuzaana" False; --: V ;
-  read_V2 = mkV2 "Kushoma" False;--: V2 ;
+  play_V = mkV "zaan"; --: V ;
+  read_V2 = mkV2 "shoma";--: V2 ;
   ready_A = mkAdjective "eteekateekire" False; --: A ;
   red_A = mkAdjective "ríkutukura" False; --: A ;
-  run_V = mkV "Kwíruka" False; -- : V ;
-  see_V2 = mkV2 "kureeba" False; --: V2 ;
-  sleep_V = mkV "kunyama" False; --: V ;--Kugwejegyera, kubyama
+  run_V = mkV "íruk"; -- : V ;
+  see_V2 = mkV2 "reeb"; --: V2 ;
+  sleep_V = mkV "nyama" ; --: V ;--Kugwejegyera, kubyama
   small_A = mkAdjective "kye" False;
-  swim_V = mkV "kwoga" False; --: V ;
-  teach_V2 = mkV2 "kushomesa" False; --: V2 ; or kwegyesa
-  travel_V = mkV "kugyenda" False;--: V ;
-  understand_V2 = mkV2 "kwétegyereza" False; --: V2 ;
-  wait_V2 = mkV2 "kutegyereza" False; --: V2 ;
-  walk_V = mkV "kugyenda" False; --: V ; or kuribata
+  swim_V = mkV "og"; --: V ;
+  teach_V2 = mkV2 "shomes" ; --: V2 ; or kwegyesa
+  travel_V = mkV "gyend";--: V ;
+  understand_V2 = mkV2 "étegyerez"; --: V2 ;
+  wait_V2 = mkV2 "tegyerez"; --: V2 ;
+  walk_V = mkV "tabur"; --: V ; or kuribata
   warm_A = mkAdjective "rikutagata" False;--: A ;
   white_A = mkAdjective "rikwera" False;--: A ;
   yellow_A = mkAdjective "kinekye" False;--: A ; or yero, or kyenju
   young_A = mkAdjective "to" False;--: A ;
+
+}
   --add_V3 : V3 ;
 {-
 abstract Lexicon = Cat ** {

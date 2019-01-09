@@ -1,121 +1,155 @@
+--# -path=.:../abstract
 concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in 
 {
 	lincat
-	  Utt = {s : Str} ;
-      Pol  = {s : Str ; isTrue : Bool} ; -- the s field is empty, but needed for parsing
-      Temp = {s : Str ; isPres : Bool} ;
-      S  = {s : Str} ;
-      Prep = {s : Str ; prepForm: PrepForm} ;
-      Pol  = {s : Str ; s2: Str ; isTrue}; -- TRUE= Positive, FALSE=Negative
 
-      -- Temp is a parameter for temporal features such as Simul and Anteriority:
-      -- 	TRUE =  Simultainity
-      --    FALSE = Anteriority
-      Temp = {s : Str : isPres : Bool};
+	--Common
+	  Utt = {s : Str} ;
+      Pol = {s : Str ; s2: Str ; isTrue: Bool}; -- TRUE= Positive, FALSE=Negative, s filed is left empty for parsing
+      {-
+			Temp is a parameter for temporal features such as Simul and Anteriority:
+      		TRUE =  Simultainity
+      		FALSE = Anteriority
+      -}
+      Temp = {s : Str ; isPres : Bool} ;
+     --cat
+      Imp = {s : Bool => Str} ;
       S  = {s : Str} ;
       QS = {s : Str} ;
-
-      -- Clause is a combination of a Subject, Verb and Object(s)
-      -- i.e. Subj, verb with polarity and temp features and verb complement
-      -- which is the Objects, NPs PPs APs etc.
+      {-
+	      -- Clause is a combination of a Subject, Verb and Object(s)
+	      -- i.e. Subj, verb with polarity and temp features and verb complement
+	      -- which is the Objects, NPs PPs APs etc.
+	 -}
       Cl, QCl = {   -- word order is fixed in S and QS
-      subj : Str ;                             -- subject
-      verb : Bool => Bool => {fin,inf : Str} ; -- dep. on Pol,Temp, e.g. "does","sleep"
+      subj : Str ;
+      subjAgr: Agreement;
+      vforms : VFormMini=>Str;
+      {-
+      inf  : Str;
+      pres  : Str; 
+      past  : Str; 
+      presPart  : Str; 
+      pastPart  : Str;                              -- subject
+      --root : Str ; -- dep. on Pol,Temp, e.g. "does","sleep"
+      -}
       compl : Str                              -- after verb: complement, adverbs
       } ;
-
+      
       Imp = {s : Bool => Str} ;
-
-      Conj = {s : AgrConj =>Str ;s2 : Str ; n : Number} ;
+      VP =  VerbPhrase; --{s: VerbFormMini=>Str; comp:Str ; agr : AgrExist};     -- verb phrase                         	e.g. "lives here"
+      AP = Adjective ;     -- adjectival phrase         	e.g. "very warm"
+      CN = Noun ;     -- common noun (without determiner)   e.g. "red house"
+      NP = NounPhrase;     -- noun phrase (subject or object)     e.g. "the red house"
+	  Pron = Pronoun;   -- personal pronoun                    e.g. "she"
+      Det = Determiner;
+      Conj = {s : AgrConj =>Str ;s2 : Str ; n : Number} ; -- conjunction e.g. "and"
+      Prep = {s : Str ; other: Str} ;
+      V  = Verb;      			-- one-place verb             e.g. "sleep" 
+      V2 = Verb2;     			-- two-place verb             e.g. "love"
+      A = Adjective;      	-- one-place adjective        e.g. "warm"
+      N = Noun;      		-- common noun                e.g. "house"
+      S  = {s : Str};
+      CN = Noun ;
+      PN = ProperNoun;     				-- proper name                e.g. "Paris"
+      Adv =AdverbP;   -- adverbial phrase           e.g. "in the house"
       
 
 
       -- lin part of the grammar
       lin
-      	-- Noun
+-- Noun
+    DetCN  det cn =  mkDetCN det cn;       -- the man
+	UsePN pn = {s = \\ _ =>  pn.s; agr = pn.a}; -- John
+	UsePron pron = { s = table{Nom => pron.s ! Nom; Acc => pron.s ! Acc}; agr = pron.agr};  --: Pron -> NP ;            -- he
+	MassNP cn = {s = \\_ =>cn.s ! Complete ! Pl; agr = AgP3 Pl cn.gender};   --: CN -> NP ;              -- milk
+	{-
+		In the following determiners, I am ignoring the role
+		of the initial vowel in conveying supposed meaning
+		of the definitie and indefinite vowels
 
-      	{-
+		Note: This is why we choose the complete form of the noun for use
+	-}
+	a_Det = {s =[] ; ntype = Complete; num = Sg; pos = PreDeterminer};     --: Det ; indefinite singular ---s
+	aPl_Det = {s =[]; ntype = Complete; num = Pl; pos = PreDeterminer}; -- : Det ;indefinite plural   ---s
+	the_Det = {s =[]; ntype = Complete; num = Sg; pos = PreDeterminer};  --: Det ;                   -- definite singular   ---s
+	thePl_Det = {s =[]; ntype = Complete; num = Pl; pos = PreDeterminer}; --: Det ;definite plural     ---s
+	UseN noun = noun;     --: N -> CN ;               -- house
+	--Noun : Type = {s : NounState => Number => Str ; gender : Gender} ;
+	AdjCN ap cn = 
+		case ap.isPre of {
+				True  => { s = \\ ns, num => ap.s ++ (cn.s ! ns ! num) ; gender = cn.gender };
+				False => { s = \\ ns, num => cn.s ! ns ! num ++ ap.post ; gender = cn.gender }
+	};        -- big house
+{-
 
-			-- Phrase
-    UttS      s =s; --: S  -> Utt ;
-    UttNP     np = {s=np.s}; --: NP -> Utt ;
-
+-- Phrase
+UttS      s =s; --: S  -> Utt ;
+UttNP     np = {s=np.s}; --: NP -> Utt ;
+-}
 -- Sentence
-    UsePresCl pol cl = {s= pol.s ++ cl.s!pol.b}; --: Pol -> Cl  -> S ;        -- John does not walk ---s
-    PredVP np vp = {s= table{b => np.s ++  vp.verb.s!b !(VPres np.a) ++ vp.comp}}; --: NP -> VP -> Cl ;        -- John walks / John does not walk
+    --UseCl     : Temp -> Pol -> Cl   -> S ;  -- John has not walked
+    --UseQCl  temp, pol, qcl =  --: Temp -> Pol -> QCl  -> QS ; -- has John walked
+    QuestCl cl = cl;  --: Cl -> QCl ;                 -- does John (not) walk
+    PredVP np vp = {
+    	subj = np.s ! Nom;   --: NP -> VP -> Cl ;            -- John walks / John does not walk
+    	subjAgr = np.agr;
+    	vforms = vp.s;
+    	{-
+    	inf  = vp;
+		pres  = mkVerbPres vp.root; 
+		past  = mkVerbPast vp.root; 
+		presPart  = mkVerbPresPart vp.root; 
+		pastPart  = mkVerbPastPart vp.root;                              -- subject
+		-}
+		--root = vp.root ;
+    	compl = vp.comp
+    	};
+
+    
+    ImpVP  vp = {
+    	s = --let restOfverb = 
+    		--in 
+    		table{
+    		True => restOfverb vp;
+    			--}--vp.root ++ Predef.BIND ++ "a";
+    		False =>(mkSubjClitic (AgMUBAP2 Sg)) ++ Predef.BIND ++ "ta" ++ restOfverb vp} -- How do I make the number dynamic?
+    };  --: VP -> Imp ;                 -- walk / do not walk
+
 -- Verb
-    UseV    v = {verb= v ; comp =[]; objA = AgrNo};  --: V   -> VP; -- sleep
-    ComplV2  v2 np = {
-       verb ={
-           s= v2.s; 
-           isAux = v2.isAux
-           }; 
-       comp =v2.c ++ np.s ;
-       objA   =  AgrYes np.a --: V2  -> NP -> VP ;       -- love it  ---s
+    UseV    v = {s = v.s ; comp =[]; agr = AgrNo};  --: V   -> VP; -- sleep --ignoring object agreement
+  
+    ComplV2  v2 np = { 
+    	s =v2.s; 
+    	comp = v2.compPrep ++  np.s ! Acc; 
+    	agr = AgrYes np.agr
     };
     
-    UseAP  ap = {verb = copRiNi; comp = ap.s; objA = AgrNo };    -- : AP  -> VP ;             -- be small ---s
+    UseAP  ap = {s=\\_=> "ri"; comp = ap.s; agr = AgrNo };    -- : AP  -> VP ;             -- be small ---s
 
-    AdvVP  vp adv = {verb = vp.verb; comp = vp.comp ++ adv.s; objA = AgrNo};  --: VP -> Adv -> VP ;       -- sleep here
-
--- Noun
-
-    DetCN det cn ={s = 
-        case det.isPrefix of{
-            True  => det.s!cn.nc ++ cn.s!det.n;
-            False => cn.s!det.n ++ det.s!cn.nc
-        };
-        a = Agr cn.nc det.n Per3
-    };
-        
-
-
-    UsePN  propn   = {s = propn.s; a = propn.a}; --: PN -> NP ;              -- John
-
-    UsePron  pron = {s = pron.s; a = pron.a}; --: Pron -> NP ;            -- he
-
-    MassNP   cn   = {s = cn.s!Pl; a = Agr cn.nc Pl Per3};                   --CN -> NP ;    --This is problematic          -- milk
-
-    CoordS conj a b = {s = a.s ++ conj.s ++ b.s} ;
-    a_Det     = prefixDeterminer "" Sg ;                   -- indefinite singular ---s
-    aPl_Det   = prefixDeterminer "" Pl ;                   -- indefinite plural   ---s
-    thePl_Det = prefixDeterminer "" Pl ; --= postfixDeterminer "ngi" Pl ;
-    the_Det   = prefixDeterminer "" Sg ;                   -- definite plural     ---s
-    UseN n    = n ;  
-    AdjCN     ap cn = {s = case ap.isPrefix of {
-                                True => table {
-                                    Sg => objMarkerInAnim !False! cn.nc!Sg ++ ap.s ++ cn.s!Sg;
-                                    Pl => objMarkerInAnim !False! cn.nc!Pl ++ ap.s ++ cn.s!Pl};
-                                        
-                                False =>table {
-                                    Sg => cn.s!Sg ++ objMarkerInAnim !False!cn.nc!Sg ++ ap.s;
-                                    Pl => cn.s!Pl ++ objMarkerInAnim !False!cn.nc!Pl ++ ap.s}
-                                         --(Agr cn.nc Pl Per3)}
-                                    };
-                                nc =  cn.nc };    --: AP -> CN  -> CN ;       -- big house
-
+    AdvVP  vp adv = {s = vp.s; comp = vp.comp ++ adv.s; agr = AgrNo};  --: VP -> Adv -> VP ;       -- sleep here
 
 -- Adjective: Positive, Comparative, Superative
-    PositA    adj = adj;  --: A  -> AP ;              -- warm
+    PositA    adj = adj;  --: A  -> AP ; -- warm i.e positive
 
 -- Adverb
-    PrepNP    prep np = {s = prep.s ++ np.s}; --: Prep -> NP -> Adv ;     -- in the house
+    PrepNP    prep np = {s = prep.s ++ np.s ! Acc; agr = AgrYes np.agr}; --: Prep -> NP -> Adv ;     -- in the house
 
 -- Conjunction
-    --CoordS    s1 s2 ={}; --: Conj -> S -> S -> S ;   -- he walks and she runs ---s
- 
+   --CoordS    s1 s2 ={}; --: Conj -> S -> S -> S ;   -- he walks and she runs ---s
+   CoordS conj a b = {s = a.s ++ conj.s!(AConj Other) ++ b.s} ;
 -- Tense
-    PPos      = {s = [] ; b = True}; --: Pol ;                   -- I sleep  [positive polarity]
-    PNeg      = {s = [] ; b = False}; --: Pol                     -- I do not sleep [negative polarity]
+    PPos = {s = [] ; s2 = [] ; isTrue = True};  --: Pol ; -- nimbyama [positive polarity]
+    PNeg = {s = "ti"  ; s2 = "ta" ; isTrue = True}; --: Pol  -- tinkubyama [negative polarity]
 
     
 
-      	-}
+      	
     	
-    	-- Determiners
-    	every_Det = mkDet "buri" Incomplete Sg PreDeterminer ;
-  		few_Det = mkDet "buri" Complete Pl PostDeterminer ;
-  		many_Det = mkDet "ingi" Complete Pl PostDeterminer ;
+-- Determiners
+every_Det = mkDet "buri" Incomplete Sg PreDeterminer ;
+few_Det = mkDet "buri" Complete Pl PostDeterminer ;
+many_Det = mkDet "ingi" Complete Pl PostDeterminer ;
 
 
 
@@ -138,6 +172,7 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 		 	}; 
 
 		 {-
+
 		 	TODO: Look at the grammar books by Mpairwe & Kahangi Pg 155
 		 	and investigate or to find out its arguments but for now
 		 	I will assume nari works on all types of 
@@ -146,13 +181,13 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 		 	nari is the general or
 			
 			These are candidates for Extra module if they are not specific
-			to the type pf argument.
+			to the type of argument.
 		 	nînga for Runynakore and 
 
 		 	nainga for rukiga
 		 -}
     	 or_Conj = {
-		 	s = \\ _ => nari	
+		 	s = \\ _ => "nari";	
 		 	s2 =[];
 		 	n  = Sg	
 		 	};
@@ -165,13 +200,13 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
     	 
     	 --na --please this string varies with vowels use combine_morphemes or 
     	 --combine_words when using it.
-    	 with_Prep      = mkPrep "na" ""; 
+    	 with_Prep      = mkPrep "na" []; 
 
-    	 i_Pron         = mkPron "nyowe" "nyowe" AgMUBAP1 Sg;
-	     youSg_Pron     = mkPron "iwe" "we" AgMUBAP2 Sg; 
-	     he_Pron, she_Pron = mkPron "uwe" "uwe" AgP3 Sg MU_BA;
-	     we_Pron        = mkPron "itwe" "itwe" AgMUBAP1 Pl;
-	     youPl_Pron     = mkPron "imwe" "imwe" AgMUBAP2 Pl;
-	     they_Pron      = mkPron "bo" "bo" AgP3 Pl MU_BA;
+    	 i_Pron         = mkPron "nyowe" "nyowe" (AgMUBAP1 Sg);
+	     youSg_Pron     = mkPron "iwe" "we" (AgMUBAP2 Sg); 
+	     he_Pron, she_Pron = mkPron "uwe" "uwe" (AgP3 Sg MU_BA);
+	     we_Pron        = mkPron "itwe" "itwe" (AgMUBAP1 Pl);
+	     youPl_Pron     = mkPron "imwe" "imwe" (AgMUBAP2 Pl);
+	     they_Pron      = mkPron "bo" "bo" (AgP3 Pl MU_BA);
 
 }
