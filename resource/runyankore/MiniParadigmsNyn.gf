@@ -16,5 +16,8 @@ oper
     mkN : Str -> Str -> Gender -> Noun = mkNoun;
     };
 
+    mkV  : Str -> Verb = \root ->{s =root; morphs= mkVerbMorphs};
+    mkV2 : Str -> Verb2 = \root ->mkV root **  {compPrep ="ira"};
+
 
 }

@@ -418,597 +418,110 @@ oper
         <PreDeterminer> => { s =\\_ => det.s ++ cn.s ! det.ntype ! det.num; agr = AgP3 det.num cn.gender} --;
         --<PostDeterminer, PFalse> => {s = \\_=> cn.s!det.ntype!det.num; agr = AgP3 det.num cn.gender }    
          };
-    {-
+  
 
-    have_V2 : V2 ;
-    -}
-  ParticleForms : Type = PersonalPronounType => Agreement =>  Str;
-  mkNCParticles : ParticleForms  = table {
-      SubjM => table { 
-              AgMUBAP1 Sg => "n" ;
-              AgMUBAP1 Pl => "tu" ;
-              AgMUBAP2 Sg => "wa" ;
-              AgMUBAP2 Pl => "mu" ;
-              AgP3 Sg MU_BA  => "a" ;
-              AgP3 Pl MU_BA  => "ba" ;          
-              AgP3 Sg KI_BI   => "ki" ;
-              AgP3 Pl (KI_BI | ZERO_BI)   => "bi" ;
-              AgP3 Sg (RU_N | RU_MA | RU_ZERO | RU_BU)   => "ru" ; 
-              AgP3 Pl RU_N => "zi"; --| "i"; 
-              AgP3 Sg N_N => "e";
-              AgP3 Pl N_N => "zi"; --| "i";
-              AgP3 Sg (MU_MI | MU_ZERO)   => "gu" ; 
-              AgP3 Pl MU_MI   => "e" ;
-              AgP3 Sg (RI_MA | RI_ZERO | I_ZERO) => "ri"; 
-              AgP3 Pl (RI_MA | BU_MA | KU_MA | ZERO_MA | I_MA |RU_MA)  => "ga" ;
-              AgP3 Sg (KA_BU | KA_ZERO | KA_TU)   => "ka" ; 
-              AgP3 Pl (KA_BU | RU_BU)  => "bu" ;
-              AgP3 Sg ZERO_BU  => "bu" ; 
-              AgP3 Pl ZERO_BU  => "bu" ;
-              AgP3 Sg ZERO_BI  => "bi" ; 
-              AgP3 Sg ZERO_MA  => "ga" ;
-              AgP3 Pl RI_ZERO  => "ga" ;
-              AgP3 Sg KU_ZERO  => "ku" ;
-              AgP3 Pl KU_ZERO  => "ku" ;
-              AgP3 Pl MU_ZERO  => "gu" ;
-              AgP3 Pl RU_ZERO  => "ru" ;
-              AgP3 Sg ZERO_TU  => "tu" ;
-              AgP3 Pl ZERO_TU  => "tu" ;
-              AgP3 Sg (ZERO_MI | ZERO_ZERO)  => "" ;
-              AgP3 Pl ZERO_MI  => "e" ;
-              AgP3 Pl KA_ZERO  => "" ;
-              _        => "XX" --for checking if there is some class unaccounted for   
-             };
-      {-Object particle may be used as 
-          1. a prefix: e.g mu-kwate = catch him,
-          2. an infix: o-mu-kwate   = you catch him
-
-      -}
-      Obj => table { 
-              AgMUBAP1 Sg => "n" ;
-              AgMUBAP1 Pl => "tu" ;
-              AgMUBAP2 Sg => "ku" ;
-              AgMUBAP2 Pl => "ba" ;
-              AgP3 Sg MU_BA => "mu" ;
-              AgP3 Pl MU_BA => "ba";
-              AgP3 Pl (ZERO_BU | KA_BU | KA_TU | RU_BU) => "bu" ;
-              AgP3 Sg BU_MA => "bu" ;
-              AgP3 Sg KI_BI => "ki" ; 
-              AgP3 Pl (KI_BI | ZERO_BI) => "bi";
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "ga" ;
-              AgP3 (Sg | Pl) HA => "ha";
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) => "ri" ;
-              AgP3 Sg (KA_ZERO | KA_BU | KA_TU) => "ka" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "ku" ;
-              {- 
-                 #comment for the following two lines
-                 the follwing partciles are all used by Noun Classes of Place i.e. HA, KU and MU
-                 We take the particle to be "ha" for all of them although noun class KU can use
-                 another particle "gi" -- see Table of Concords in Appendix of Dictionary by Mpairwe and Kahangi
-
-                 Note: The particles do not change with respect to gender
-
-                 TODO: obtain clear examples of usage
-              -}
-              AgP3 (Sg | Pl) (HA | MU) => "ha" ;
-              AgP3 (Sg | Pl) KU => "ha" ;  -- gi is also possible -- see comment above
-
-              AgP3 Sg (RU_N | RU_ZERO | RU_BU | RU_MA) => "ru" ;
-              AgP3 Pl (KA_TU | ZERO_TU) => "tu" ;
-              
-              AgP3 Sg (N_N | ZERO_ZERO) => "gi" ; 
-             
-              AgP3 Sg (MU_MI | MU_ZERO) => "gu" ;
-              AgP3 Pl  GU_GA => "ga" ; 
-              AgP3 Pl (MU_MI | ZERO_MI) => "gi" ; 
-              {-
-                  According to Mpaiwe & Kahangi in their table of concords, the particle for the plural
-                  of noun classes N_N , ZERO_ZERO , ZERO_N & RU_N can be either "i" or "zi" depending
-                  on object they refer to. 
-                  
-                  Problem:
-                  However, we cannot use the | operator in strings as GF will
-                  fail to compile to comletion. 
-                  Implication:
-                  Some of our output strings will have the wrong object particle attached.
-                  Even if the operator | worked, we would generate two versions of the linearized 
-                  string of which one would be right and the other wrong 
-                  What is the solution to this? 
-              -}
-              AgP3 Pl (N_N | ZERO_ZERO | ZERO_N | RU_N) => "zi" ; --some cases require use of particle "i" 
-              
-              _ => "-" -- Hopefully exhausted all forms 
-             };
-      -- who, which
-      RelSubj => table {
-              AgMUBAP1 Sg => "o" ;
-              AgMUBAP1 Pl => "aba" ;
-              AgMUBAP2 Sg => "o" ;
-              AgMUBAP2 Pl => "aba" ;
-              AgP3 Sg MU_BA  => "o" ;
-              AgP3 Pl MU_BA  => "aba" ;
-              AgP3 Sg BU_MA => "obu" ;
-              AgP3 Pl (ZERO_BU | KA_BU | RU_BU) =>"obu" ; 
-              AgP3 Sg KI_BI  => "eki" ; 
-              AgP3 Pl (KI_BI | ZERO_BI)  => "ebi" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "aga" ;
-              AgP3 (Sg | Pl) (HA | MU) => "ha" ; -- better AgP3 _ (HA | MU) => "ha";
-              AgP3 (Sg | Pl) KU => "e" ;
-              AgP3 Sg (I_ZERO | I_MA | RI_ZERO | RI_MA) => "eri" ;
-              AgP3 Sg (KA_ZERO | KA_BU) => "aka" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "oku" ;
-              AgP3 Sg (RU_N | RU_ZERO | RU_BU | RU_MA) => "oru" ;
-              AgP3 Pl (ZERO_TU | KA_TU) => "otu" ;
-              AgP3 Pl RU_N    => "ezi" ; 
-              AgP3 Sg N_N     => "ei" ; 
-              AgP3 Pl (ZERO_ZERO | ZERO_N | RU_N | N_N) => "ezi" ;
-              AgP3 Sg (MU_MI | MU_ZERO | GU_GA) => "ogu" ;
-              AgP3 Sg (ZERO_ZERO | N_N ) => "e" ;
-              AgP3 Pl (MU_MI | ZERO_MI) => "e" ;
-              AgP3 Pl GU_GA => "aga" ;
-              _        => "="  -- means something forgoten i.e. debugging purposes   
-             };
-      
-      --Relative Object paticle such as whom/which found in row 13 of Table of concords in Mpairwe & Kahangi
-      RelObj => table { 
-              AgMUBAP1 Sg => "ou" ;
-              AgMUBAP1 Pl => "abi" ; -- use of "abu" is also allowed (depending on what?) but omitted because of compiler issues with | operator
-              AgMUBAP2 Sg => "ou" ;
-              AgMUBAP2 Pl => "abi" ; -- use of "abu" is also allowed (depending on what?) but omitted because of compiler issues with | operator
-              AgP3 Sg MU_BA => "ou" ;
-              AgP3 Pl MU_BA => "abi" ; -- use of "abu" is also allowed (depending on what?) but omitted because of compiler issues with | operator
-              AgP3 Sg BU_MA => "obu" ;
-              AgP3 Pl (ZERO_BU | KA_BU |RU_BU) => "obu" ;
-              AgP3 Sg KI_BI => "eki" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "ebi" ;
-
-              {-
-                The noun classes ZERO_MA,KU_MA,RI_MA,I_MA & BU_MA can use of Relative object particles
-                "agi" or "agu"  (depending on noun class of clause -sure? (depending on what?)) but we 
-                choose one "agi" because of compiler issues with | operator
-                
-                Qn: Any Solutions
-              -}
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "agi" ; 
-              
-              -- of place HA & MU
-              --both ahi and  "ahu" are valid particles  for noun classes HA and MU but "ahu" omitted 
-              --because of compiler issues with | operator
-              AgP3 (Sg | Pl) (HA | MU) => "ahi" ; -- better AgP3 _ (HA | MU) => "ha";
-
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"eri" ;
-              -- of place KU
-              AgP3 (Sg | Pl) KU => "ei" ;
-
-              --both aki and  "aku" are valid particles  for noun classes KA_ZERO & KA_BU but "aku" omitted 
-              --because of compiler issues with | operator
-              AgP3 Sg (KA_ZERO | KA_BU) =>"aki" ;
-
-              AgP3 Sg (KU_ZERO | KU_MA) => "oku" ;
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "oru" ;
-              AgP3 Pl (ZERO_TU | KA_TU) =>"otu" ;
-
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "ezi" ; 
-              AgP3 Sg (ZERO_ZERO | N_N) =>"ei" ; 
-              AgP3 Sg (MU_MI | MU_ZERO | GU_GA) => "ogu" ;
-              AgP3 Pl (MU_MI | ZERO_MI) => "ei" ;
-              
-              --both agi and  "agu" are valid particles  for noun classes GU_GA in plural but "agu" omitted 
-              --because of compiler issues with | operator
-              AgP3 Pl GU_GA => "agi" ;
-              _        =>  "="  -- means something forgoten i.e. debugging purposes     
-             };
-
-      -- Adjectival Prefixes with initial vowel with the semantics of the 
-      AdjPron2 => table {
-              AgMUBAP1 Sg => "omu" ;
-              AgMUBAP1 Pl => "aba" ;
-              AgMUBAP2 Sg => "omu" ;
-              AgMUBAP2 Pl => "aba" ;
-              AgP3 Sg MU_BA => "omu" ;
-              AgP3 Pl MU_BA => "aba" ;
-              AgP3 Pl ZERO_BU => "obu" ;
-              AgP3 Sg BU_MA => "obu" ;
-              AgP3 Pl (KA_BU | RU_BU) =>"obu" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "ebi" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "ama";
-              AgP3 (Sg | Pl) (HA | MU) => "aha" ; -- of place HA & MU
-              AgP3 (Sg | Pl) KU => "en" ; -- of place KU
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"eri" ;
-              AgP3 Sg (KA_ZERO | KA_BU) =>"aka" ;
-              AgP3 Sg KI_BI   => "eki" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "oku" ;
-              AgP3 Sg (MU_MI | MU_ZERO) => "omu" ;
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "oru" ;
-              AgP3 Pl (ZERO_TU | KA_TU) =>"otu" ;
-              AgP3 Sg (ZERO_ZERO | N_N) =>"en" ;
-              AgP3 Pl ZERO_MI => "en" ;
-              AgP3 Pl MU_MI => "emi";
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "en" ;
-              AgP3 Sg GU_GA => "ogu" ;
-              AgP3 Pl GU_GA => "aga" ;
-              _  =>  "XXX" -- error checking for any case not catered for 
-               };
-
-      -- Adjectival Prefixes without initial vowel      
-      AdjPron => table { 
-              AgMUBAP1 Sg => "mu" ;
-              AgMUBAP1 Pl => "ba" ;
-              AgMUBAP2 Sg => "mu" ;
-              AgMUBAP2 Pl => "ba" ;
-              AgP3 Sg MU_BA  => "mu" ;
-              AgP3 Pl MU_BA  => "ba" ;
-              AgP3 Pl ZERO_BU => "bu";
-              AgP3 Sg BU_MA => "bu" ;
-
-              AgP3 Pl (KA_BU | RU_BU) =>"bu" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "bi" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "ma" ;
-
-              
-              AgP3 (Sg | Pl) (HA | MU) => "ha" ; -- of place HA & MU
-              AgP3 (Sg | Pl) KU => "n" ; -- of place KU
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"ri" ;
-              AgP3 Sg (KA_ZERO | KA_BU) =>"ka" ;
-              AgP3 Sg KI_BI   => "ki" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "ku" ;
-              AgP3 Sg (MU_MI | MU_ZERO) => "omu";
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "ru" ;
-              AgP3 Pl (ZERO_TU | KA_TU) =>"tu" ;
-              AgP3 Sg (ZERO_ZERO | N_N) =>"n" ;
-              AgP3 Pl ZERO_MI => "n" ;
-              AgP3 Pl MU_MI => "emi" ;
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "n" ;
-              AgP3 Sg GU_GA => "ogu" ;
-              AgP3 Pl GU_GA => "aga" ;
-              _        =>  "XXX"     -- for debugging purposes
-               } ;
-      --Genetive Preposition: exclusively of (with initial vowel) 
-      GenPrep1 => table { 
-              AgMUBAP1 Sg => "owa" ;
-              AgMUBAP1 Pl => "aba" ;
-              AgMUBAP2 Sg => "owa" ;
-              AgMUBAP2 Pl => "aba" ;
-              AgP3 Sg MU_BA  => "owa" ; 
-              AgP3 Pl MU_BA  => "aba" ;
-              AgP3 Pl ZERO_BU => "obwa" ;
-              AgP3 Sg BU_MA => "obwa" ;
-
-              AgP3 Pl (KA_BU | RU_BU) =>"obwa" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "ebya" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "aga" ;
-
-              
-              AgP3 (Sg | Pl) HA => "aha" ; -- of place HA 
-              AgP3 (Sg | Pl) MU => "omwa" ; -- of place MU
-              AgP3 (Sg | Pl) KU => "eya" ; -- of place KU
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"erya" ;
-              AgP3 Sg (KA_ZERO | KA_BU) =>"aka" ;
-              AgP3 Sg KI_BI   => "ekya" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "okwa" ;
-              AgP3 Sg (MU_MI | MU_ZERO) => "ogwa" ;
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "orwa" ;
-              AgP3 Pl (ZERO_TU | KA_TU) =>"otwa" ;
-              AgP3 Sg (ZERO_ZERO | N_N) =>"eya" ;
-              AgP3 Pl ZERO_MI => "eya" ;
-              AgP3 Pl MU_MI => "eya" ;
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "eza" ;
-              AgP3 Sg GU_GA => "ogwa" ;
-              AgP3 Pl GU_GA => "aga" ;
-              _        =>  "XYY"     -- for debugging purposes
-               };
-      --Genetive Preposition: simply of without initial vowel
-      GenPrep2 => table { 
-              AgMUBAP1 Sg => "wa" ;
-              AgMUBAP1 Pl => "ba" ;
-              AgMUBAP2 Sg => "wa" ;
-              AgMUBAP2 Pl => "ba" ;
-              AgP3 Sg MU_BA  => "wa" ;
-              AgP3 Pl MU_BA  => "ba" ;
-              AgP3 Pl ZERO_BU => "bwa" ;
-              AgP3 Sg BU_MA => "bwa" ;
-
-              AgP3 Pl (KA_BU | RU_BU) =>"bwa" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "bya" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "ga" ;
-
-              
-              AgP3 (Sg | Pl) HA => "ha" ; -- of place HA 
-              AgP3 (Sg | Pl) MU => "mwa" ; -- of place MU
-              AgP3 (Sg | Pl) KU => "ya" ; -- of place KU
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"rya" ;
-              AgP3 Sg (KA_ZERO | KA_BU) =>"ka" ;
-              AgP3 Sg KI_BI   => "kya" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "kwa" ;
-              AgP3 Sg (MU_MI | MU_ZERO) => "gwa" ;
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "rwa";
-              AgP3 Pl (ZERO_TU | KA_TU) =>"twa" ;
-              AgP3 Sg (ZERO_ZERO | N_N) =>"ya" ;
-              AgP3 Pl ZERO_MI => "ya" ;
-              AgP3 Pl MU_MI => "ya" ;
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "za" ;
-              AgP3 Sg GU_GA => "gwa" ;
-              AgP3 Pl GU_GA => "ga" ;
-              _        =>  "XYY"     -- for debugging purposes
-            };
-      -- Genetive Adjective suffixes used to form genetive adjectives when conjugated to 
-      -- the genetive prepositions particles
-      -- examples: ekya-{ngye}= my own or mine, ekya-{itu}= our own or ours, 
-      -- ekya-{we}-your own or yours 
-      GenAdj => table { 
-              AgMUBAP1 Sg => "ngye" ;
-              AgMUBAP1 Pl => "itu" ;
-              AgMUBAP2 Sg => "we" ;
-              AgMUBAP2 Pl => "nyu" ;
-              AgP3 Sg MU_BA  => "e" ;
-              AgP3 Pl MU_BA  => "bo" ;
-              AgP3 Pl ZERO_BU => "bwo" ;
-              AgP3 Sg BU_MA => "bwo" ;
-
-              AgP3 Pl (KA_BU | RU_BU) =>"bwo" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "byo" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "go" ;
-
-              
-              AgP3 (Sg | Pl) HA => "ho" ; -- of place HA 
-              AgP3 (Sg | Pl) MU => "mwo" ; -- of place MU
-              AgP3 (Sg | Pl) KU => "yo" ; -- of place KU
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"ryo" ;
-              AgP3 Sg (KA_ZERO | KA_BU) =>"ko" ;
-              AgP3 Sg KI_BI => "kyo" ;
-              AgP3 Sg (KU_ZERO | KU_MA) => "kwo" ;
-              AgP3 Sg (MU_MI | MU_ZERO) => "gwo" ;
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "rwo" ;
-              AgP3 Pl (ZERO_TU | KA_TU) =>"two" ;
-              AgP3 Sg (ZERO_ZERO | N_N) =>"two" ;
-              AgP3 Pl ZERO_MI => "yo" ;
-              AgP3 Pl MU_MI => "yo" ;
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "zo" ;
-              AgP3 Sg GU_GA => "gwo" ;
-              AgP3 Pl GU_GA => "go" ;
-              _ =>  "XXYY"     -- for debugging purposes 
-               } ;
-      SStandPron => table { 
-              AgMUBAP1 Sg =>"nyowe" ;
-              AgMUBAP1 Pl =>"itwe" ;
-              AgMUBAP2 Sg =>"iwe" ;
-              AgMUBAP2 Pl =>"imwe" ;
-              AgP3 Sg MU_BA  => "uwe" ;
-              AgP3 Pl MU_BA  => "bo" ;
-              AgP3 Pl ZERO_BU => "bwo" ;
-              AgP3 Sg BU_MA => "bwo" ;
-
-              AgP3 Pl (KA_BU | RU_BU) =>"bwo" ;
-              AgP3 Pl (KI_BI | ZERO_BI) => "byo" ;
-              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => "go" ;
-
-              
-              AgP3 (Sg | Pl) HA => "ho" ; -- of place HA 
-              AgP3 (Sg | Pl) MU => "mwo" ; -- of place MU
-              AgP3 (Sg | Pl) KU => "yo" ; -- of place KU
-              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>"ryo" ;
-              AgP3 Sg (KA_ZERO | KA_BU) =>"ko" ;
-              AgP3 Sg KI_BI   => "kyo";
-              AgP3 Sg (KU_ZERO | KU_MA) => "kwo" ;
-              AgP3 Sg (MU_MI | MU_ZERO) => "gwo";
-              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => "rwo" ;
-              AgP3 Pl (ZERO_TU | KA_TU) =>"two" ;
-              AgP3 Sg (ZERO_ZERO | N_N) =>"two" ;
-              AgP3 Pl ZERO_MI => "yo" ;
-              AgP3 Pl MU_MI => "yo" ;
-              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  => "zo" ; 
-              AgP3 Sg GU_GA => "gwo" ; 
-              AgP3 Pl GU_GA => "go" ;
-              _ =>  "XXYY"     -- for debugging purposes 
-               }
-            } ;
+    
+    
       --Verb
       param
         VFormMini =  Inf | Pres | Past | PastPart | PresPart ;
       oper
-      Verb : Type = {s : VFormMini => Str};
+      --Verb : Type = {s : VFormMini => Str};
+      Verb : Type = {s : Str; morphs: VFormMini => VerbMorphPos=> Str};
       Verb2 : Type = Verb ** {compPrep:Str};
-      --{priNeg,secNeg,presPartMarker,pastParticipleMarker,root, end : Str};
-      --mkV  : Str -> Verb = \str ->{root = str};
-      mkV  : Str -> Verb = \root ->{s = table {
-            Inf => mkVerbInf root;
-            Pres => mkVerbPres root;
-            Past => mkVerbPast root;
-            PresPart => mkVerbPresPart root;
-            PastPart => mkVerbPastPart root
-
-        }
-      };
-      mkV2 : Str -> Verb2 = \root ->mkV root **  {compPrep ="ira"};
+      
       {-
         Given a root, can you form the different verbforms?
       -}
       param
-        VerbMorphPos = PriNegM | ObjRel | SubjMarker | 
-                       SecNegM | TAMarker | PersisiveMarker| DObjM | IDobjM | None;
+        VerbMorphPos = PreVerb | PriNegM | --ObjRel | SubjMarker | 
+                       SecNegM | TAMarker | PersisiveMarker| --DObjM | IDobjM |
+                       RestOfVerb;
       oper
-      VerbPhrase: Type = {s: VFormMini=>Str; comp:Str ; agr : AgrExist};
-      restOfverb: VerbPhrase -> Str =\vp -> case <vp.s !Inf> of {<_ + "Stem" + g> => g};
-      --, pres, past, pastPart,presPart
-        {-VerbForm : Type = {
-          --inf, pres , past, pastPart,presPart: 
-          {
-              s: Str ;
-              t1 :Str;--{t1 : Str; t1pos: VerbMorphPos; t2 : Str ; t2pos:VerbMorphPos}; 
-              t1pos: VerbMorphPos;
-              t2 : Str ; 
-              t2pos:VerbMorphPos;
-              p1 :Str; --{p1 : Str; p1pos: VerbMorphPos; p2 : Str ; p2pos:VerbMorphPos};
-              p1pos: VerbMorphPos; 
-              p2 : Str ; 
-              p2pos:VerbMorphPos;
-              end  : Str
-        };-}
-        {-
-        VerbForm: Type ={
-                            s : Str;
-                            tenseM : Str * VerbMorphPos; 
-                            polM: Str * VerbMorphPos; 
-                            restOfVerbFormed:Str
+      VMorphs : Type = VFormMini => VerbMorphPos => Str;
+      VerbPhrase: Type = {s:Str; morphs: VMorphs ; comp:Str ; agr : AgrExist};
+      
+      {-
+          This function packages the different morphemes of the each tense of verb
+          that are commonly used and have not more than two possibilities i.e.
+          1. infintive marker at begining of verb
+          2. ni - continuous marker at begining of the present participle / present continuous
+          3. ti - Primary Negative marker
+          4. ta - Secondary Negative Marker
+          5. Tense and aspect markers
+          6. Persistive Marker
+          7. Rest of Verb. 
+        These can be increased further. Note: Only those tenses clossest to the english equivalent 
+        have been chosen. The full resource shall require even more.
+      -}
+      mkVerbMorphs: VMorphs = table{
+            Inf => table{ 
+                          PreVerb => "ku";
+                          PriNegM => []; 
+                          --ObjRel => [];
+                          --SubjMarker =[]; 
+                          SecNegM => "ta"; 
+                          TAMarker => []; 
+                          PersisiveMarker => [];
+                          --DObjM => [];
+                          --IDobjM => [];
+                          RestOfVerb =>"a"
                         };
-        -}                            
-        --VerbForms: Type = VFormMini => Bool =>VerbForm;
-      --mkVerbInf :Str -> VerbForm =\root ->{
-      mkVerbInf :Str -> Str =\root -> "ku" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "ta" ++ Predef.BIND ++ "SecNegM" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "Stem" ++Predef.BIND ++ root++ Predef.BIND ++ "a"; {-;
-        t1 = [];--{t1 = []; t1pos = None; t2 = [] ; t2pos = None}; --<[],None, [],None>;
-        t1pos = None; 
-        t2 = [] ; 
-        t2pos = None;
-        p1 = []; --{p1 = []; p1pos = None; p2 = "ta" ; p2pos = SecNegM};--<[],None, "ta", SecNegM>;
-        p1pos = None; 
-        p2 = "ta" ; 
-        p2pos = SecNegM;
-        end  = "a"  
-      };-}
-             
-      --mkVerbPres : VerbForm = {
-      mkVerbPres :Str -> Str =\root -> Predef.BIND ++"ti" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++"stem" ++ Predef.BIND ++ root ++ Predef.BIND ++ "a";
-                      --s = [];
-                      {-
-                      t1 = [];--{t1 = []; t1pos = None; t2 = [] ; t2pos = None}; --<[],None,[],None>;
-                      t1pos = None; 
-                      t2 = [] ; 
-                      t2pos = None;
-                      p1   = [];--{p1 = []; p1pos = None; p2 = "ti" ; p2pos = PriNegM}; --<[],None,"ti" ,PriNegM>;
-                      p1pos = None; 
-                      p2 = "ti" ; 
-                      p2pos = PriNegM;
-                      end    = "a"
-                      };-}
-                    
-      --mkVerbPast :VerbForm = {
-      mkVerbPast:Str -> Str =\root -> Predef.BIND ++"ti" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "stem" ++ Predef.BIND ++ root ++ Predef.BIND ++ "ire"; 
-                      {-
-                      t1 = [];--{t1 = []; t1pos = None; t2 = [] ; t2pos = None}; --<[],None,[],None>;
-                      t1pos = None; 
-                      t2 = [] ; 
-                      t2pos = None;
-                      p1 = [];--{p1 = []; p1pos = None; p2 = "ti" ; p2pos = PriNegM}; --<[],None,"ti" ,PriNegM>;
-                      p1pos = None; 
-                      p2 = "ti" ; 
-                      p2pos = PriNegM;
-                      end  =  "ire";    
-                      };-} 
-            
-            
-        --mkVerbPresPart :VerbForm ={
-        mkVerbPresPart :Str -> Str =\root -> "ni" ++ Predef.BIND ++ "ContM" ++ Predef.BIND ++ "ti" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "stem" ++ Predef.BIND ++ root ++ Predef.BIND ++"a";
-                        --s = [];
-                        {-
-                        t1 = "ni"; -- {t1 = "ni"; t1pos = PriNegM; t2 = [] ; t2pos = None};--<"ni", PriNegM>;
-                        t1pos = PriNegM; 
-                        t2 = [] ; 
-                        t2pos = None;
-                        p1 = []; --{p1 = []; p1pos = None; p2 = "ti" ; p2pos = PriNegM};
-                        p1pos = None; 
-                        p2 = "ti" ; 
-                        p2pos = PriNegM;
-                        end    = "a"
-                      };-}
-        --mkVerbPastPart :VerbForm = {
-        mkVerbPastPart :Str -> Str =\root ->  "ti" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "stem" ++ Predef.BIND ++ root ++ Predef.BIND ++ "a"; {-
-                        --s = [];
-                        t1 = "aa"; -- {t1 = "aa"; t1pos = TAMarker; t2 = "aa" ; t2pos = TAMarker};
-                        t1pos = TAMarker; 
-                        t2 = "aa" ; 
-                        t2pos = TAMarker;
-                        p1 = []; -- {p1 = []; p1pos = None; p2 = "ti" ; p2pos = PriNegM};
-                        p1pos = None; 
-                        p2 = "ti" ; 
-                        p2pos = PriNegM;
-                        end    = "a"
-                      };-}
+            Pres => table{
+                          PreVerb => [];
+                          PriNegM => "ti"; 
+                          --ObjRel => [];
+                          --SubjMarker =[]; 
+                          SecNegM => []; 
+                          TAMarker => []; 
+                          PersisiveMarker => [];
+                          --DObjM => [];
+                          --IDobjM => [];
+                          RestOfVerb =>"a"
+                        };
+            --mkVerbPast:Str -> Str =\root -> Predef.BIND ++"ti" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "stem" ++ Predef.BIND ++ root ++ Predef.BIND ++ "ire"; 
+            Past => table{
+                          PreVerb => [];
+                          PriNegM => "ti"; 
+                          --ObjRel => [];
+                          --SubjMarker =[]; 
+                          SecNegM => []; 
+                          TAMarker => []; 
+                          PersisiveMarker => [];
+                          --DObjM => [];
+                          --IDobjM => [];
+                          RestOfVerb =>"ire"
+                        };
+            --"ni" ++ Predef.BIND ++ "ContM" ++ Predef.BIND ++ "ti" ++ Predef.BIND ++ "PriNegM" ++ Predef.BIND ++ "TM1" ++ Predef.BIND ++ "Empy" ++ Predef.BIND ++ "TM2" ++ Predef.BIND ++ "Empty" ++ Predef.BIND ++ "stem" ++ Predef.BIND ++ root ++ Predef.BIND ++"a";
+            PresPart => table{
+                          PreVerb => "ni";
+                          PriNegM => "ti"; 
+                          --ObjRel => [];
+                          --SubjMarker =[]; 
+                          SecNegM => []; 
+                          TAMarker => []; 
+                          PersisiveMarker => [];
+                          --DObjM => [];
+                          --IDobjM => [];
+                          RestOfVerb =>"a"
+                        };
+            PastPart => table{
+                          PreVerb => [];
+                          PriNegM => "ti"; 
+                          --ObjRel => [];
+                          --SubjMarker =[]; 
+                          SecNegM => []; 
+                          TAMarker => "aa"; 
+                          PersisiveMarker => [];
+                          --DObjM => [];
+                          --IDobjM => [];
+                          RestOfVerb =>"a"
+                        }
+
+      };
 
       --oper
         --Concatenates two strings at runtime without spaces
         
         glue: Str -> Str ->Str =\ x, y -> x ++ BIND ++ y;
 }
-{-
-  regNoun : Str -> Noun = \sg -> mkNoun sg (sg + "s") ; -- ignored
-
-  -- smart paradigm
-  smartNoun : Str -> Noun = \sg -> case sg of {
-    _ + ("ay"|"ey"|"oy"|"uy") => regNoun sg ;
-    x + "y"                   => mkNoun sg (x + "ies") ;
-    _ + ("ch"|"sh"|"s"|"o")   => mkNoun sg (sg + "es") ;
-    _                         => regNoun sg
-    } ;
-
-  Adjective : Type = {s : Str} ;
-
-  Verb : Type = {s : VForm => Str} ;
-
-  mkVerb : (inf,pres,past,pastpart,prespart : Str) -> Verb
-    = \inf,pres,past,pastpart,prespart -> {
-    s = table {
-      Inf => inf ;
-      PresSg3 => pres ;
-      Past => past ;
-      PastPart => pastpart ;
-      PresPart => prespart
-      }
-    } ;
-
-  regVerb : (inf : Str) -> Verb = \inf ->
-    mkVerb inf (inf + "s") (inf + "ed") (inf + "ed") (inf + "ing") ;
-
-  -- regular verbs with predictable variations
-  smartVerb : Str -> Verb = \inf -> case inf of {
-     pl  +  ("a"|"e"|"i"|"o"|"u") + "y" => regVerb inf ;
-     cr  +  "y" =>  mkVerb inf (cr + "ies") (cr + "ied") (cr + "ied") (inf + "ing") ;
-     lov + "e"  => mkVerb inf (inf + "s") (lov + "ed") (lov + "ed") (lov + "ing") ;
-     kis + ("s"|"sh"|"x") => mkVerb inf (inf + "es") (inf + "ed") (inf + "ed") (inf + "ing") ;
-     _ => regVerb inf
-     } ;
-
-  -- normal irregular verbs e.g. drink,drank,drunk
-  irregVerb : (inf,past,pastpart : Str) -> Verb =
-    \inf,past,pastpart ->
-      let verb = smartVerb inf
-      in mkVerb inf (verb.s ! PresSg3) past pastpart (verb.s ! PresPart) ;   
-
-  negation : Bool -> Str = \b -> case b of {True => [] ; False => "not"} ; 
-
-  -- two-place verb with "case" as preposition; for transitive verbs, c=[]
-  Verb2 : Type = Verb ** {c : Str} ;
-
-  -- generalized verb, here just "be"
- param
-   GVForm = VF VForm | PresSg1 | PresPl | PastPl ;
-
- oper
-  GVerb : Type = {
-     s : GVForm => Str ;
-     isAux : Bool
-     } ;
-
-  be_GVerb : GVerb = {
-     s = table {
-       PresSg1 => "am" ;
-       PresPl  => "are" ;
-       PastPl  => "were" ;
-       VF vf   => (mkVerb "be" "is" "was" "been" "being").s ! vf
-       } ;
-     isAux = True
-     } ;
-
-  -- in VP formation, all verbs are lifted to GVerb, but morphology doesn't need to know this
-   verb2gverb : Verb -> GVerb = \v -> {s =
-     table {
-       PresSg1 => v.s ! Inf ;
-       PresPl  => v.s ! Inf ;
-       PastPl  => v.s ! Past ;
-       VF vf   => v.s ! vf
-       } ;
-     isAux = False
-     } ;
-
-}
-}
--}

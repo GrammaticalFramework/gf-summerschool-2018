@@ -5,7 +5,7 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 
 	--Common
 	  Utt = {s : Str} ;
-      Pol = {s : Str ; s2: Str ; isTrue: Bool}; -- TRUE= Positive, FALSE=Negative, s filed is left empty for parsing
+      Pol = {s : Str ; isTrue: Bool}; -- TRUE= Positive, FALSE=Negative, s filed is left empty for parsing
       {-
 			Temp is a parameter for temporal features such as Simul and Anteriority:
       		TRUE =  Simultainity
@@ -23,8 +23,9 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 	 -}
       Cl, QCl = {   -- word order is fixed in S and QS
       subj : Str ;
-      subjAgr: Agreement;
-      vforms : VFormMini=>Str;
+      subjAgr : Agreement;
+      root : Str;
+      morphs : VFormMini => VerbMorphPos =>Str;
       {-
       inf  : Str;
       pres  : Str; 
@@ -81,22 +82,51 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 				True  => { s = \\ ns, num => ap.s ++ (cn.s ! ns ! num) ; gender = cn.gender };
 				False => { s = \\ ns, num => cn.s ! ns ! num ++ ap.post ; gender = cn.gender }
 	};        -- big house
-{-
+
 
 -- Phrase
 UttS      s =s; --: S  -> Utt ;
-UttNP     np = {s=np.s}; --: NP -> Utt ;
--}
+
+UttNP     np = {s= np.s!Acc}; --: NP -> Utt ;
+
+UttAdv   adv = {s = adv.s}; --: Adv -> Utt ;        -- in the house
+
+UttImpSg  pol imp = {s = 
+	case pol.isTrue of {
+			b => imp.s!b					
+		}
+	};--: Pol -> Imp -> Utt ; -- (do not) walk ----s
+
 -- Sentence
-    --UseCl     : Temp -> Pol -> Cl   -> S ;  -- John has not walked
-    --UseQCl  temp, pol, qcl =  --: Temp -> Pol -> QCl  -> QS ; -- has John walked
+    UseCl   = UseQCl; -- : Temp -> Pol -> Cl   -> S ;  -- John has not walked
+    UseQCl  temp pol cl = let 
+    								subj = cl.subj;
+    								clitic = mkSubjClitic cl.subjAgr;
+    								pres = cl.morphs ! Pres;
+    								past = cl.morphs ! Past;
+    								priNeg = pres! PriNegM;
+    								root = cl.root;
+    								presRestOfVerb = cl.morphs ! Pres ! RestOfVerb;
+    								pastRestOfVerb = cl.morphs ! Past ! RestOfVerb
+    							  in 
+    	case <temp.isPres, pol.isTrue> of {
+    									<True, True> => {s = subj ++ clitic ++ Predef.BIND ++ 
+    													root ++ Predef.BIND ++ presRestOfVerb};
+    									<True, False> => {s = subj ++ priNeg ++ Predef.BIND ++ 
+    													clitic ++ Predef.BIND ++ root ++ presRestOfVerb};
+    									<False, True> => {s = subj ++ clitic ++ Predef.BIND ++ 
+    													root ++ Predef.BIND ++ pastRestOfVerb};				
+    									<False, False> =>{s = subj ++ priNeg ++ Predef.BIND ++ clitic ++ Predef.BIND ++ 
+    													root ++ Predef.BIND ++ pastRestOfVerb}
+    							};  --: Temp -> Pol -> QCl  -> QS ; -- has John walked
     QuestCl cl = cl;  --: Cl -> QCl ;                 -- does John (not) walk
     PredVP np vp = {
     	subj = np.s ! Nom;   --: NP -> VP -> Cl ;            -- John walks / John does not walk
     	subjAgr = np.agr;
-    	vforms = vp.s;
+    	root = vp.s;
+    	morphs = vp.morphs;
     	{-
-    	inf  = vp;
+    	inf  = mkVerbInrf vp.root;
 		pres  = mkVerbPres vp.root; 
 		past  = mkVerbPast vp.root; 
 		presPart  = mkVerbPresPart vp.root; 
@@ -106,28 +136,27 @@ UttNP     np = {s=np.s}; --: NP -> Utt ;
     	compl = vp.comp
     	};
 
-    
+    --{-
     ImpVP  vp = {
-    	s = --let restOfverb = 
-    		--in 
-    		table{
-    		True => restOfverb vp;
-    			--}--vp.root ++ Predef.BIND ++ "a";
-    		False =>(mkSubjClitic (AgMUBAP2 Sg)) ++ Predef.BIND ++ "ta" ++ restOfverb vp} -- How do I make the number dynamic?
+		    	s =table{
+		    		True => vp.morphs!Inf!PreVerb ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb;
+		    		False =>(mkSubjClitic (AgMUBAP2 Sg)) ++ Predef.BIND ++ vp.morphs!Inf!SecNegM ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb -- How do I make the number dynamic use case?
+		    		} 
     };  --: VP -> Imp ;                 -- walk / do not walk
-
+    ---}
 -- Verb
-    UseV    v = {s = v.s ; comp =[]; agr = AgrNo};  --: V   -> VP; -- sleep --ignoring object agreement
+    UseV    v = {s = v.s ; morphs = v.morphs; comp =[]; agr = AgrNo};  --: V   -> VP; -- sleep --ignoring object agreement
   
     ComplV2  v2 np = { 
-    	s =v2.s; 
+    	s =v2.s;
+    	morphs = v2.morphs; 
     	comp = v2.compPrep ++  np.s ! Acc; 
     	agr = AgrYes np.agr
     };
     
-    UseAP  ap = {s=\\_=> "ri"; comp = ap.s; agr = AgrNo };    -- : AP  -> VP ;             -- be small ---s
+    UseAP  ap = {s="ri"; morphs = \\_, _=> []; comp = ap.s; agr = AgrNo };    -- : AP  -> VP ;             -- be small ---s
 
-    AdvVP  vp adv = {s = vp.s; comp = vp.comp ++ adv.s; agr = AgrNo};  --: VP -> Adv -> VP ;       -- sleep here
+    AdvVP  vp adv = {s = vp.s; morphs = vp.morphs; comp = vp.comp ++ adv.s; agr = AgrNo};  --: VP -> Adv -> VP ;       -- sleep here
 
 -- Adjective: Positive, Comparative, Superative
     PositA    adj = adj;  --: A  -> AP ; -- warm i.e positive
