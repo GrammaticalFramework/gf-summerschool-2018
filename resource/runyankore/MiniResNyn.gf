@@ -473,7 +473,7 @@ oper
       --Verb : Type = {s : VFormMini => Str};
       Verb : Type = {s : Str; morphs: VFormMini => VerbMorphPos=> Str};
       
-      --GVerb : Type = Verb ** {isAux : Bool};
+      GVerb : Type = Verb ** {isAux : Bool};
       Verb2 : Type = Verb ** {compPrep:Str};
       {-
         Given a root, can you form the different verbforms?
@@ -485,9 +485,10 @@ oper
       oper
       VMorphs : Type = VFormMini => VerbMorphPos => Str;
       VerbPhrase: Type = {s:Str; morphs: VMorphs ; comp:Str ; isCompApStem : Bool; agr : AgrExist};
+      -- in VP formation, all verbs are lifted to GVerb, but morphology doesn't need to know this
+     verb2gverb : Verb -> GVerb = \v -> {s = v.s; morphs = v.morphs; isAux = False};
       
-      
-      be_Verb : Verb = {s= "ri"; morphs = \\_,_ =>[]};
+     be_Verb : GVerb = {s= "ri"; morphs = \\_,_ =>[]; isAux = True};
 
       {-
       --copulative conjugations of ni and ri as used for adjectives
