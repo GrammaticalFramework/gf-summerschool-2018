@@ -77,7 +77,6 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 		thePl_Det = {s =[]; ntype = Complete; num = Pl; pos = PreDeterminer}; --: Det ;definite plural     ---s
 		UseN noun = noun;     --: N -> CN ;               -- house
 		--Noun : Type = {s : NounState => Number => Str ; gender : Gender} ;
-		
 		AdjCN ap cn = 
 			case <ap.isPre, ap.isProper, > of {
 					<True, True> => { 
@@ -108,6 +107,7 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 									}										
 
 		};        -- big house
+
 
 	-- Phrase
 	UttS      s =s; --: S  -> Utt ;
@@ -174,13 +174,13 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 										pastPart  = mkVerbPastPart vp.root;                              -- subject
 										-}
 										--root = vp.root ;
-								    	compl = mkSubjClitic np.agr ++ Predef.BIND ++ vp.comp --mkSubjClitic np.agr ++ Predef.BIND ++ vp.comp
+								    	compl = mkSubjClitic np.agr ++ Predef.BIND ++ vp.comp --error is on this line but I have failed to figure out the source of spurious lexical error
 								    }
-    	};--: NP -> VP -> Cl ; -- John walks / John does not walk
+    	};
    
     ImpVP  vp = {
 		    	s =table{
-		    		True=> vp.morphs!Inf!PreVerb ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb;
+		    		True => vp.morphs!Inf!PreVerb ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb;
 		    		False =>(mkSubjClitic (AgMUBAP2 Sg)) ++ Predef.BIND ++ vp.morphs!Inf!SecNegM ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb -- How do I make the number dynamic use case?
 		    		} 
     };  --: VP -> Imp ;                 -- walk / do not walk
@@ -204,16 +204,14 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
     	Solution: The adjective picks the stem from the subject instead of the
     	noun as what we did in AdjCN
     -}
-    
+    {-
     UseAP  ap = case <ap.isPre, ap.isProper> of {
     				 <True, True> => {s="ri"; morphs = \\_, _=> []; comp = ap.s; isCompApStem = False; agr = AgrNo };    -- : AP  -> VP ;-- be small ---s
     				 <False, True> => {s="ri"; morphs = \\_, _=> []; comp = ap.post; isCompApStem = False; agr = AgrNo };
     				 <True, False> => {s="ri"; morphs = \\_, _=> []; comp = ap.s; isCompApStem = True; agr = AgrNo };
-    				 <False, False> => {s="ri"; morphs = \\_, _=> []; comp = ap.post; isCompApStem = True; agr = AgrNo }
+    				 <False, False> => {s="ri"; morphs = \\_, _=> []; comp = ap.post; isCompApStem = True; agr = AgrNo };
     			};
-    --UseNP     : NP  -> VP ;
-    --UseAdv  adv = {s = vp.s; morphs = vp.morphs; comp = vp.comp ++ adv.s; isCompApStem = False; agr = AgrNo};  --: Adv -> VP ;
-
+    -}
     AdvVP  vp adv = {s = vp.s; morphs = vp.morphs; comp = vp.comp ++ adv.s; isCompApStem = False; agr = AgrNo};  --: VP -> Adv -> VP ;       -- sleep here
 
 -- Adjective: Positive, Comparative, Superative
@@ -228,15 +226,11 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 -- Tense
     PPos = {s = [] ; s2 = [] ; isTrue = True};  --: Pol ; -- nimbyama [positive polarity]
     PNeg = {s = "ti"  ; s2 = "ta" ; isTrue = True}; --: Pol  -- tinkubyama [negative polarity]
-	TSim = {s = []    ; isPres = True} ;     --: Temp ;                  -- simultanous: she sleeps ---s
-    TAnt = {s = []    ; isPres = False} ;     --: Temp ;                  -- anterior: she has slept ---s
+	
 -- Determiners
 every_Det = mkDet "buri" Incomplete Sg PreDeterminer ;
-{-
-	Functions not in abstract syntanx
--}
---few_Det = mkDet "buri" Complete Pl PostDeterminer ;
---many_Det = mkDet "ingi" Complete Pl PostDeterminer ;
+few_Det = mkDet "buri" Complete Pl PostDeterminer ;
+many_Det = mkDet "ingi" Complete Pl PostDeterminer ;
 
 
 

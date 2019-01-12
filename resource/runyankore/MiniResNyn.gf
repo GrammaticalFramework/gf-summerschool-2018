@@ -1,5 +1,6 @@
 resource MiniResNyn = --ParamX ** 
-	open Prelude in {
+	open Prelude in 
+  {
 
 param 
 	Number = Sg | Pl;
@@ -202,7 +203,7 @@ oper
       case a of {
           AgMUBAP1 n => mkClitics "n" "tu" n;
           --AgMUBAP1 Pl => "tu" ;
-          AgMUBAP2 n => mkClitics "wa" "a" n;
+          AgMUBAP2 n => mkClitics "o" "a" n;
           --AgMUBAP2 Pl => "mu" ;
           AgP3 n MU_BA  => mkClitics "a" "ba" n;
           --AgP3 Pl MU_BA  => "ba" ;          
@@ -302,20 +303,30 @@ oper
     {-
       The Adjective can be before the noun for TRUE or
       it can be after the noun (FLASE)
+      Most Adjectives are stems which are meaningless 
+      without adjectival prefixes. These prefixes are concords that agree
+      with the noun before the them. 
+
+      However ome adjectives are self-standing.
+      
 
       You can introduce a more meaningful name or using
       Inari's method of avoiding tables
-      i.e. Adjective: Type = { pre : Str  ; post : Agr => Str}
-
+      i.e. Adjective: Type = { pre : Str  ; post : Str; isPre: Bool; isProper : Bool}
+            pre -- the adjective or adjective stem that comes before noun
+            post --the adjective or adjective stem that comes after noun
+            isPre --whether the adjective comes before (TRUE) or after (FALSE) the noun
+            isProper -- True for a full adjective anf False for an adjectival stem
+            isPrep -- does the adjective need a preposition especially those that come after the noun.
       improve that further by avoiding carrying a table of strings 
       using arne's technique
     -}
 
-    Adjective : Type = {s : Str ; post : Str; isPre : Bool} ;
-    mkAdjective: Str-> Bool -> Adjective = \ a , b -> case b of {
-      True => { s = [] ; post = a ; isPre = True} ; 
+    Adjective : Type = {s : Str ; post : Str; isPre : Bool; isProper : Bool; isPrep: Bool} ;
+    mkAdjective: Str -> Bool -> Bool -> Bool -> Adjective = \ a , isPre, isProper, isPrep -> case isPre of {
+      True => { s = a ; post = [] ; isPre = True; isProper = isProper; isPrep = isPrep} ; 
       --this is supposed to be a concatenation use bind and I will do so later
-      False => { s = a ; post = []; isPre = False} -- requires agreement later  
+      False => { s = [] ; post = a; isPre = False; isProper = isProper; isPrep = isPrep} -- requires agreement later  
 
       };
 
@@ -350,6 +361,39 @@ oper
               AgP3 Sg GU_GA => mkClitic "ogu" ;
               AgP3 Pl GU_GA => mkClitic "aga" ;
               _  => mkClitic "XXX" -- error checking for any case not catered for
+
+    };
+
+    -- Genetive Preposition: simple "of" without Initila vowel
+    mkGenPrepNoIVClitic : Agreement -> Str = \a -> case a of {
+              AgMUBAP1 n => mkClitics "wa" "ba" n;
+              --AgMUBAP1 Pl => "aba" ;
+              AgMUBAP2 n => mkClitics "wa" "ba" n; --probably an error check your grammar book
+              --AgMUBAP2 Pl => "aba" ;
+              AgP3 n MU_BA => mkClitics "wa" "ba" n;
+              --AgP3 Pl MU_BA => "aba" ;
+              AgP3 Pl ZERO_BU => mkClitic "bwa" ;
+              AgP3 Sg BU_MA => mkClitic "bwa" ;
+              AgP3 Pl (KA_BU | RU_BU) => mkClitic "bwa" ;
+              AgP3 Pl (KI_BI | ZERO_BI) => mkClitic "bya" ;
+              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => mkClitic "ga";
+              AgP3 (Sg | Pl) HA => mkClitic "ha" ; -- of place HA 
+              AgP3 (Sg | Pl) MU => mkClitic "mwa" ; -- of place MU
+              AgP3 (Sg | Pl) KU => mkClitic "ya" ; -- of place KU
+              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>mkClitic "rya" ;
+              AgP3 Sg (KA_ZERO | KA_BU) =>mkClitic "ka" ;
+              AgP3 Sg KI_BI   => mkClitic "kya" ;
+              AgP3 Sg (KU_ZERO | KU_MA) => mkClitic "kwa" ;
+              AgP3 Sg (MU_MI | MU_ZERO) => mkClitic "gwa" ;
+              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => mkClitic "rwa" ;
+              AgP3 Pl (ZERO_TU | KA_TU) =>mkClitic "twa" ;
+              AgP3 Sg (ZERO_ZERO | N_N) =>mkClitic "ya" ;
+              AgP3 Pl ZERO_MI =>mkClitic "ya" ;
+              AgP3 Pl MU_MI => mkClitic "emi";
+              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  =>mkClitic "za" ;
+              AgP3 Sg GU_GA => mkClitic "gwa" ;
+              AgP3 Pl GU_GA => mkClitic "ga" ;
+              _  => mkClitic "Error mkGenPrepNoIVClitic" -- error checking for any case not catered for
 
     };
 
@@ -428,8 +472,9 @@ oper
       oper
       --Verb : Type = {s : VFormMini => Str};
       Verb : Type = {s : Str; morphs: VFormMini => VerbMorphPos=> Str};
-      Verb2 : Type = Verb ** {compPrep:Str};
       
+      --GVerb : Type = Verb ** {isAux : Bool};
+      Verb2 : Type = Verb ** {compPrep:Str};
       {-
         Given a root, can you form the different verbforms?
       -}
@@ -439,8 +484,26 @@ oper
                        RestOfVerb;
       oper
       VMorphs : Type = VFormMini => VerbMorphPos => Str;
-      VerbPhrase: Type = {s:Str; morphs: VMorphs ; comp:Str ; agr : AgrExist};
+      VerbPhrase: Type = {s:Str; morphs: VMorphs ; comp:Str ; isCompApStem : Bool; agr : AgrExist};
       
+      
+      be_Verb : Verb = {s= "ri"; morphs = \\_,_ =>[]};
+
+      {-
+      --copulative conjugations of ni and ri as used for adjectives
+      
+      copRiNi :Verb ={
+        s= table {
+        True => table{
+                VPres (Agr (NC_mu_ba) Sg Per1)  => "ndi" ;
+                VPres (Agr (NC_mu_ba) Pl Per1)  => "turi";
+                VPres (Agr (NC_mu_ba) Sg Per2)  => "ori" ;
+                VPres (Agr (NC_mu_ba) Pl Per2)  => "muri";
+                VPres (Agr (NC_mu_ba) Sg Per3)  => "ari" ;
+                VPres (Agr (NC_mu_ba) Pl Per3)  => "bari";
+                VPres (Agr (_) _ _)=> ""
+      };
+      -}
       {-
           This function packages the different morphemes of the each tense of verb
           that are commonly used and have not more than two possibilities i.e.
