@@ -203,7 +203,7 @@ oper
       case a of {
           AgMUBAP1 n => mkClitics "n" "tu" n;
           --AgMUBAP1 Pl => "tu" ;
-          AgMUBAP2 n => mkClitics "o" "a" n;
+          AgMUBAP2 n => mkClitics "o" "mu" n;
           --AgMUBAP2 Pl => "mu" ;
           AgP3 n MU_BA  => mkClitics "a" "ba" n;
           --AgP3 Pl MU_BA  => "ba" ;          
@@ -329,9 +329,10 @@ oper
       False => { s = [] ; post = a; isPre = False; isProper = isProper; isPrep = isPrep} -- requires agreement later  
 
       };
-
-    --Subject prefixes / particles of clitics using bind
-
+    {-
+        TO DO:
+        --Subject prefixes / particles of clitics using bind
+    -}
     -- Adjectival Prefixes with initial vowel with the semantics of the 
     mkAdjPronIVClitic : Agreement -> Str = \a -> case a of {
               AgMUBAP1 n => mkClitics "omu" "aba" n;
@@ -364,6 +365,37 @@ oper
 
     };
 
+    -- Adjectival Prefixes without initial vowel with the semantics for adjectives used in Imperative negative form
+    mkAdjPronNoIVClitic : Agreement -> Str = \a -> case a of {
+              AgMUBAP1 n => mkClitics "mu" "ba" n;
+              --AgMUBAP1 Pl => "aba" ;
+              AgMUBAP2 n => mkClitics "mu" "ba" n; --probably an error check your grammar book
+              --AgMUBAP2 Pl => "aba" ;
+              AgP3 n MU_BA => mkClitics "mu" "ba" n;
+              --AgP3 Pl MU_BA => "aba" ;
+              AgP3 Pl ZERO_BU => mkClitic "bu" ;
+              AgP3 Sg BU_MA => mkClitic "bu" ;
+              AgP3 Pl (KA_BU | RU_BU) => mkClitic "bu" ;
+              AgP3 Pl (KI_BI | ZERO_BI) => mkClitic "bi" ;
+              AgP3 Pl (ZERO_MA | KU_MA | RI_MA | I_MA | BU_MA) => mkClitic "ma";
+              AgP3 (Sg | Pl) (HA | MU) => mkClitic "ha" ; -- of place HA & MU
+              AgP3 (Sg | Pl) KU => mkClitic "n" ; -- of place KU
+              AgP3 Sg (I_ZERO | I_MA | RI_MA) =>mkClitic "ri" ;
+              AgP3 Sg (KA_ZERO | KA_BU) =>mkClitic "ka" ;
+              AgP3 Sg KI_BI   => mkClitic "ki" ;
+              AgP3 Sg (KU_ZERO | KU_MA) => mkClitic "ku" ;
+              AgP3 Sg (MU_MI | MU_ZERO) => mkClitic "mu" ;
+              AgP3 Sg (RU_ZERO | RU_BU | RU_MA| RU_N) => mkClitic "ru" ;
+              AgP3 Pl (ZERO_TU | KA_TU) =>mkClitic "tu" ;
+              AgP3 Sg (ZERO_ZERO | N_N) =>mkClitic "n" ;
+              AgP3 Pl ZERO_MI =>mkClitic "n" ;
+              AgP3 Pl MU_MI => mkClitic "mi";
+              AgP3 Pl (ZERO_ZERO | ZERO_N | N_N | RU_N)  =>mkClitic "n" ;
+              AgP3 Sg GU_GA => mkClitic "gu" ;
+              AgP3 Pl GU_GA => mkClitic "ga" ;
+              _  => mkClitic "XX" -- error checking for any case not catered for
+
+    };
     -- Genetive Preposition: simple "of" without Initila vowel
     mkGenPrepNoIVClitic : Agreement -> Str = \a -> case a of {
               AgMUBAP1 n => mkClitics "wa" "ba" n;
@@ -473,8 +505,18 @@ oper
       --Verb : Type = {s : VFormMini => Str};
       Verb : Type = {s : Str; morphs: VFormMini => VerbMorphPos=> Str};
       
-      GVerb : Type = Verb ** {isAux : Bool};
-      Verb2 : Type = Verb ** {compPrep:Str};
+      GVerb : Type = {s : Bool =>Str ; morphs: VFormMini => VerbMorphPos =>Str; isAux : Bool};
+      {-
+        The V2 sometimes uses preopsitions for formation
+        of direct object. Unlike in English where the verb 
+        and the preposition are disjunctive such as "send to",
+        In runyakore and rukiga, the verb and preposition are
+        conjunctive such as sindik-ira.
+
+        Because of the fusion, I have deffered including this in 
+        the compPrep. Actually, it is going to be empty in the next version
+      -}
+      Verb2 : Type = Verb ** {comp:Str};
       {-
         Given a root, can you form the different verbforms?
       -}
@@ -486,9 +528,25 @@ oper
       VMorphs : Type = VFormMini => VerbMorphPos => Str;
       VerbPhrase: Type = {s:Str; morphs: VMorphs ; comp:Str ; isCompApStem : Bool; agr : AgrExist};
       -- in VP formation, all verbs are lifted to GVerb, but morphology doesn't need to know this
-     verb2gverb : Verb -> GVerb = \v -> {s = v.s; morphs = v.morphs; isAux = False};
-      
-     be_Verb : GVerb = {s= "ri"; morphs = \\_,_ =>[]; isAux = True};
+     verb2gverb : Verb ->Str -> GVerb = \v, ba -> {
+            s = table{
+                    True =>  v.s; 
+                    False => ba --the special verb to be
+                      };
+            morphs = v.morphs; 
+            isAux = False
+          }; 
+     {-
+        In Runynakore & Rukiga the verb to be in english has two
+        Infinitives i.e. 
+          a) ri --used when it is the only main and therefore licenses a subject
+          b) ba --used usually as commands, such as Imperatives or when another
+                  verb is acting as the main verb. It also acts as the infitive form
+     -} 
+     be_GVerb : GVerb = {
+        s= table{True => "ri"; False =>"b" }; 
+        morphs = mkVerbMorphs; 
+        isAux = True};
 
       {-
       --copulative conjugations of ni and ri as used for adjectives
@@ -536,7 +594,7 @@ oper
                           PriNegM => "ti"; 
                           --ObjRel => [];
                           --SubjMarker =[]; 
-                          SecNegM => []; 
+                          SecNegM => "ta"; 
                           TAMarker => []; 
                           PersisiveMarker => [];
                           --DObjM => [];

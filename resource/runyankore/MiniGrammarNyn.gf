@@ -62,7 +62,7 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 	-- Noun
 	    DetCN  det cn =  mkDetCN det cn;       -- the man
 		UsePN pn = {s = \\ _ =>  pn.s; agr = pn.a}; -- John
-		UsePron pron = { s = table{Nom => pron.s ! Nom; Acc => pron.s ! Acc}; agr = pron.agr};  --: Pron -> NP ;            -- he
+		UsePron pron = { s = pron.s; agr = pron.agr};  --: Pron -> NP ;            -- he
 		MassNP cn = {s = \\_ =>cn.s ! Complete ! Pl; agr = AgP3 Pl cn.gender};   --: CN -> NP ;              -- milk
 	{-
 		In the following determiners, I am ignoring the role
@@ -84,66 +84,73 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 										s = \\ ns, num =>ap.s ++ cn.s ! ns ! num ; 
 										gender = cn.gender 
 									};
-					<False, True> => case ap.isPrep of {
+					<False, False> => case ap.isPrep of {
 										 False 	=>	{ 
-														s = \\ ns, num => (cn.s ! ns ! num) ++ ap.post ; 
-														gender = cn.gender 
+										 				s = \\ ns, num => cn.s ! ns ! num ++ mkAdjPronIVClitic (AgP3 num cn.gender) 
+									   						 ++ ap.post ; 
+									   					gender = cn.gender	 
 													};
 										 True  =>  { 
-														s = \\ ns, num => (cn.s ! ns ! num) 
-																		++ mkGenPrepNoIVClitic (AgP3 num cn.gender)
-																			++ ap.post ; 
+														s = \\ ns, num => (cn.s ! ns ! num) ++ 
+																mkGenPrepNoIVClitic (AgP3 num cn.gender) ++ ap.post ; 
 														gender = cn.gender 
 													}
 									};
 					<True, False> => { 
 										s = \\ ns, num => mkAdjPronIVClitic (AgP3 num cn.gender) 
-															++ Predef.BIND ++ ap.s ++ (cn.s ! ns ! num) ; 
+															 ++ ap.s ++ (cn.s ! ns ! num) ; 
 										gender = cn.gender 
 									};
-					<False, False> => { 
-									   s = \\ ns, num => cn.s ! ns ! num ++ mkAdjPronIVClitic (AgP3 num cn.gender) 
-									   ++ Predef.BIND ++ ap.post ; 
-									   gender = cn.gender 
+					<False, True> => { 
+									   s = \\ ns, num => (cn.s ! ns ! num) ++ ap.post ; 
+									   gender = cn.gender
 									}										
 
 		};        -- big house
 
 	-- Phrase
-	UttS      s =s; --: S  -> Utt ;
-
+	UttS      s  = s; --: S  -> Utt ;
+	UttQS 	  qs = qs ; --: QS -> Utt ;-- does John walk
 	UttNP     np = {s= np.s!Acc}; --: NP -> Utt ;
 
 	UttAdv   adv = {s = adv.s}; --: Adv -> Utt ;        -- in the house
 
 	UttImpSg  pol imp = {s = 
 		case pol.isTrue of {
-				b => imp.s!b					
+				True  => imp.s!True;
+				False => (mkSubjClitic (AgMUBAP2 Sg)) ++ imp.s!False					
 			}
 		};--: Pol -> Imp -> Utt ; -- (do not) walk ----s
 
 -- Sentence
-    UseCl   = UseQCl; -- : Temp -> Pol -> Cl   -> S ;  -- John has not walked
-    UseQCl  temp pol cl = let 
+	{-
+		TO DO: Investigate on how to make proper questions for the few cases
+		where there is a question word such as noija? Are you coming?
+		However, most questions are achieved by change in intonation or pronounciation
+	-}
+    UseQCl   = UseCl; -- : Temp -> Pol -> Cl   -> S ;  -- John has not walked
+    UseCl  temp pol cl = let 
     								subj = cl.subj;
     								clitic = mkSubjClitic cl.subjAgr;
-    								pres = cl.morphs ! Pres;
-    								past = cl.morphs ! Past;
-    								priNeg = pres! PriNegM;
+    								simul = cl.morphs ! Pres; --this is not delivering the string
+    								ant = cl.morphs ! PastPart; --this is not delivering the string
     								root = cl.root;
     								presRestOfVerb = cl.morphs ! Pres ! RestOfVerb;
-    								pastRestOfVerb = cl.morphs ! Past ! RestOfVerb
+    								pastRestOfVerb = cl.morphs ! PastPart ! RestOfVerb;
+
+    								compl = cl.compl
     							  in 
     	case <temp.isPres, pol.isTrue> of {
-    									<True, True> => {s = subj ++ clitic ++ Predef.BIND ++ 
-    													root ++ Predef.BIND ++ presRestOfVerb};
-    									<True, False> => {s = subj ++ priNeg ++ Predef.BIND ++ 
-    													clitic ++ Predef.BIND ++ root ++ presRestOfVerb};
-    									<False, True> => {s = subj ++ clitic ++ Predef.BIND ++ 
-    													root ++ Predef.BIND ++ pastRestOfVerb};				
-    									<False, False> =>{s = subj ++ priNeg ++ Predef.BIND ++ clitic ++ Predef.BIND ++ 
-    													root ++ Predef.BIND ++ pastRestOfVerb}
-    							};  --: Temp -> Pol -> QCl  -> QS ; -- has John walked
+					<True, True> => {s = subj ++ clitic ++ --Predef.BIND ++ 
+									root ++ Predef.BIND ++ presRestOfVerb ++ compl};
+					{-Note: when I use pol.s instead of ti, the word alignment instead becomes worse-}
+					<True, False> => {s = subj ++ "ti" ++ Predef.BIND ++ clitic ++ --Predef.BIND ++ 
+										root ++ presRestOfVerb ++ compl};
+					<False, True> => {s = subj ++ clitic ++ --Predef.BIND ++ 
+										ant!TAMarker ++ root ++ Predef.BIND ++ pastRestOfVerb ++ compl};				
+					<False, False> =>{s = subj ++ "ti" ++ Predef.BIND ++ clitic ++ --Predef.BIND ++ 
+											ant!TAMarker ++ root ++ Predef.BIND ++ pastRestOfVerb ++ compl}
+    		};  --: Temp -> Pol -> QCl  -> QS ; -- has John walked
     QuestCl cl = cl;  --: Cl -> QCl ; -- does John (not) walk
     PredVP np vp = case vp.isCompApStem of{
 						False    => {
@@ -177,21 +184,35 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
 								    	compl = mkSubjClitic np.agr ++ Predef.BIND ++ vp.comp --mkSubjClitic np.agr ++ Predef.BIND ++ vp.comp
 								    }
     	};--: NP -> VP -> Cl ; -- John walks / John does not walk
-   
+   	{-
+		Note: It seems mkSubjClitic comes with a Predef.BIND already
+		prepared for the next token to bind.
+		Reason: When I add a BIND command, I get two bind tokens in the linearizations
+   	-}
     ImpVP  vp = {
 		    	s =table{
-		    		True=> vp.morphs!Inf!PreVerb ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb;
-		    		False =>(mkSubjClitic (AgMUBAP2 Sg)) ++ Predef.BIND ++ vp.morphs!Inf!SecNegM ++ vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb -- How do I make the number dynamic use case?
+		    		True=> vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb ++ vp.comp;
+		    		False =>  vp.morphs!Pres!SecNegM ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ 
+		    				vp.morphs!Inf!RestOfVerb ++ (mkAdjPronNoIVClitic (AgMUBAP2 Sg)) ++ vp.comp-- How do I make the number dynamic use case?
 		    		} 
     };  --: VP -> Imp ;                 -- walk / do not walk
     
 -- Verb
     UseV    v = {s = v.s ; morphs = v.morphs; comp =[]; isCompApStem = False; agr = AgrNo};  --: V   -> VP; -- sleep --ignoring object agreement
-  
+  	{-
+		The V2 sometimes uses preopsitions for formation
+		of direct object. Unlike in English where the verb 
+		and the preposition are disjunctive such as "send to",
+		In runyakore and rukiga, the verb and preposition are
+		conjunctive such as sindik-ira.
+
+		Because of the fusion, I have deffered including this in 
+		the compPrep. Actually, it is going to be empty in the next version
+  	-}
     ComplV2  v2 np = { 
     	s =v2.s;
     	morphs = v2.morphs; 
-    	comp = v2.compPrep ++  np.s ! Acc;
+    	comp = v2.comp ++  np.s ! Acc;
     	isCompApStem = False; 
     	agr = AgrYes np.agr
     };
@@ -205,14 +226,19 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
     	noun as what we did in AdjCN
     -}
     
-    UseAP  ap = case <ap.isPre, ap.isProper> of {
-    				 <True, True> => {s="ri"; morphs = \\_, _=> []; comp = ap.s; isCompApStem = False; agr = AgrNo };    -- : AP  -> VP ;-- be small ---s
-    				 <False, True> => {s="ri"; morphs = \\_, _=> []; comp = ap.post; isCompApStem = False; agr = AgrNo };
-    				 <True, False> => {s="ri"; morphs = \\_, _=> []; comp = ap.s; isCompApStem = True; agr = AgrNo };
-    				 <False, False> => {s="ri"; morphs = \\_, _=> []; comp = ap.post; isCompApStem = True; agr = AgrNo }
+    UseAP  ap =
+    	let 
+    		root 	= be_GVerb.s ! False;
+    		be_morphs 	= be_GVerb.morphs;
+    	in
+    		case <ap.isPre, ap.isProper> of {
+    				 <True, True> => {s = root ; morphs = be_morphs; comp = ap.s; isCompApStem = False; agr = AgrNo };    -- : AP  -> VP ;-- be small ---s
+    				 <False, True> => {s= root ; morphs = be_morphs; comp = ap.post; isCompApStem = False; agr = AgrNo };
+    				 <True, False> => {s= root ; morphs = be_morphs; comp = ap.s; isCompApStem = True; agr = AgrNo };
+    				 <False, False> =>{s= root ; morphs = be_morphs; comp = ap.post; isCompApStem = True; agr = AgrNo }
     			};
-    --UseNP     : NP  -> VP ;
-    --UseAdv  adv = {s = vp.s; morphs = vp.morphs; comp = vp.comp ++ adv.s; isCompApStem = False; agr = AgrNo};  --: Adv -> VP ;
+    UseNP   np ={s = be_GVerb.s ! False; morphs = be_GVerb.morphs; comp = np.s!Nom; isCompApStem = False; agr = AgrYes np.agr}; --: NP  -> VP ; -- be a man ---s
+    UseAdv  adv = {s = be_GVerb.s ! False; morphs = be_GVerb.morphs; comp = adv.s; isCompApStem = False; agr = AgrNo};  --: Adv -> VP ; -- be in the house ---s
 
     AdvVP  vp adv = {s = vp.s; morphs = vp.morphs; comp = vp.comp ++ adv.s; isCompApStem = False; agr = AgrNo};  --: VP -> Adv -> VP ;       -- sleep here
 
@@ -227,7 +253,7 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
    CoordS conj a b = {s = a.s ++ conj.s!(AConj Other) ++ b.s} ;
 -- Tense
     PPos = {s = [] ; s2 = [] ; isTrue = True};  --: Pol ; -- nimbyama [positive polarity]
-    PNeg = {s = "ti"  ; s2 = "ta" ; isTrue = True}; --: Pol  -- tinkubyama [negative polarity]
+    PNeg = {s = "ti"  ; s2 = "ta" ; isTrue = False}; --: Pol  -- tinkubyama [negative polarity]
 	TSim = {s = []    ; isPres = True} ;     --: Temp ;                  -- simultanous: she sleeps ---s
     TAnt = {s = []    ; isPres = False} ;     --: Temp ;                  -- anterior: she has slept ---s
 -- Determiners
@@ -298,7 +324,7 @@ every_Det = mkDet "buri" Incomplete Sg PreDeterminer ;
 	     youPl_Pron     = mkPron "imwe" "imwe" (AgMUBAP2 Pl);
 	     they_Pron      = mkPron "bo" "bo" (AgP3 Pl MU_BA);
 
-	     --have_V2 = --: V2 ;
+	     have_V2 ={s= "ine"; morphs = mkVerbMorphs; comp = []};  --: V2 ;
 	     
 
 }

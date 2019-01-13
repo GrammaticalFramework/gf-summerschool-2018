@@ -17,7 +17,7 @@ oper
     };
 
     mkV  : Str -> Verb = \root ->{s =root; morphs= mkVerbMorphs};
-    mkV2 : Str -> Verb2 = \root ->mkV root **  {compPrep ="ira"};
+    mkV2 : Str -> Verb2 = \root ->mkV root **  {comp =[]};
 
 
 }

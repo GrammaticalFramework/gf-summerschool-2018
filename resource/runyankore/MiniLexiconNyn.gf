@@ -60,7 +60,7 @@ lin
   
   --Proper Nouns
   john_PN = mkPN "Yohana" (AgP3 Sg MU_BA) False;
-  paris_PN = mkPN "Paris" (AgP3 Sg KI_BI) True; --Noun class for places???
+  paris_PN = mkPN "Paris" (AgP3 Sg N_N) True; --Noun class for places???
  
   --Adjectives
   bad_A    = mkAdjective "bi" False False False; --False means the adjective is a stem and comes after the complete noun
@@ -72,17 +72,18 @@ lin
   cold_A = mkAdjective "rikufuka" False False False; --: A ;
   good_A =mkAdjective "rungi" False False False; --: A ;
   heavy_A = mkAdjective "rikuremeera" False False False; --: A ; --notice ri as a verb is
-  hot_A = mkAdjective "rikwotsya" False False False; -- rikutagata
+  hot_A = mkAdjective "rikwotsya" False False False; -- rikutagata -- problematic words like hot we need a new set of clitics
   new_A = mkAdjective "sya" False False False; --: A ;
   old_A = mkAdjective "kúru" False False False; --: A ;
-  ready_A = mkAdjective "eteekateekire" False True False; --: A ;
+  ready_A = mkAdjective "eteekateekire" False False False; --: A ;
   red_A = mkAdjective "ríkutukura" False False False; --: A ;
   small_A = mkAdjective "kye" False False False;
   warm_A = mkAdjective "rikutagata" False False False;--: A ;
   white_A = mkAdjective "rikwera" False False False;--: A ;
   yellow_A = mkAdjective "kinekye" False True True;--: A ; or yero, or kyenju
   young_A = mkAdjective "to" False False False;--: A ;
-  
+  green_A =mkAdjective "kijubwe" False False True;
+
   --ditransitive verbs
   --bite_V2 = mkV2 "rum";
   break_V2 = mkV2 "hend"; --: V2 ;
@@ -106,7 +107,7 @@ lin
   
 
 -- Intransitive verbs
-  come_V = mkV "kwij";
+  come_V = mkV "ij";
   go_V = mkV "gyend"; --: V ; -- Many words: kuza, kuraba,kutoora, kugyenda=go away, kushuma=go down
   jump_V = mkV "guruk" ;
   play_V = mkV "zaan"; --: V ;
@@ -130,7 +131,7 @@ lin
   --already_Adv ; --has aspectual realization
   --dirty_A
   --clever_A : mkAdjective ;
-  --green_A =mkAdjective : A ; No word for green
+  --green_A =mkAdjective : --A ; 
   
   
   
