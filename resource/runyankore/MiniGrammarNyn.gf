@@ -192,9 +192,13 @@ concrete MiniGrammarNyn of MiniGrammar = open MiniResNyn, Prelude in
     ImpVP  vp = {
 		    	s =table{
 		    		True=> vp.s ++ Predef.BIND ++ vp.morphs!Inf!RestOfVerb ++ vp.comp;
-		    		False =>  vp.morphs!Pres!SecNegM ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ 
-		    				vp.morphs!Inf!RestOfVerb ++ (mkAdjPronNoIVClitic (AgMUBAP2 Sg)) ++ vp.comp-- How do I make the number dynamic use case?
-		    		} 
+		    		False =>  case vp.isCompApStem of {   -- How do I make the number dynamic use case?
+							    	True =>vp.morphs!Pres!SecNegM ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ 
+							    				vp.morphs!Inf!RestOfVerb ++ (mkAdjPronNoIVClitic (AgMUBAP2 Sg)) ++ vp.comp;
+							    	False  => vp.morphs!Pres!SecNegM ++ Predef.BIND ++ vp.s ++ Predef.BIND ++ 
+							    				vp.morphs!Inf!RestOfVerb ++ vp.comp
+		    				}
+		    	} 
     };  --: VP -> Imp ;                 -- walk / do not walk
     
 -- Verb
