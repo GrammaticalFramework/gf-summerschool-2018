@@ -1,64 +1,13 @@
 --# -path=.:alltenses
 
-concrete DoctorAra of Doctor =
+concrete DoctorAra of Doctor = DoctorFunctor with (Syntax=SyntaxAra) **
   open
-    SyntaxAra,
     ParadigmsAra,
     (L=LexiconAra),
     (R=ResAra)
   in {
 
--------------------
--- the first part could be a functor
-
-lincat
-  Phrase = Utt ;
-  Fact = Cl ;
-  Action = VP ;
-  Property = VP ;
-  Profession = CN ;
-  Person = NP ;
-  Place = {at,to : Adv} ;
-  Substance = NP ;
-  Illness = NP ;
-
 lin
-  presPosPhrase fact = mkUtt (mkS fact) ;
-  presNegPhrase fact = mkUtt (mkS negativePol fact) ;
-  pastPosPhrase fact = mkUtt (mkS anteriorAnt fact) ;
-  pastNegPhrase fact = mkUtt (mkS anteriorAnt negativePol fact) ;
-  presQuestionPhrase fact = mkUtt (mkQS (mkQCl fact)) ;
-  pastQuestionPhrase fact = mkUtt (mkQS anteriorAnt (mkQCl fact)) ;
-
-  impPosPhrase action = mkUtt (mkImp action) ;
-  impNegPhrase action = mkUtt negativePol (mkImp action) ;
-
-  actionFact person action = mkCl person action ;
-  propertyFact person property = mkCl person property ;
-
-  isProfessionProperty profession = mkVP (mkNP a_Det profession) ;
-  needProfessionProperty profession = mkVP need_V2 (mkNP a_Det profession) ;
-  isAtPlaceProperty place = mkVP place.at ;
-  haveIllnessProperty illness = mkVP have_V2 illness ;
-
-  theProfessionPerson profession = mkNP the_Det profession ;
-
-  iMascPerson = i_NP ;
-  iFemPerson = i_NP ;
-  youMascPerson = you_NP ;
-  youFemPerson = you_NP ;
-  hePerson = he_NP ;
-  shePerson = she_NP ;
-
-  goToAction place = mkVP (mkVP L.go_V) place.to ;
-  stayAtAction place = mkVP (mkVP stay_V) place.at ;
-  vaccinateAction person = mkVP vaccinate_V2 person ;
-  examineAction person = mkVP examine_V2 person ;
-  takeSubstanceAction substance = mkVP take_V2 substance ;
-
--- end of what could be a functor
---------------------------------
-
   coughAction = mkVP (mkV "سعل" va vu  "سُعَالاَ") ;
   breatheAction = mkVP (mkV "نفس" FormV) ;
   vomitAction = mkVP (mkV "قيء" FormV) ;
@@ -104,6 +53,7 @@ oper
   sAdv : Prep -> NP -> Adv = SyntaxAra.mkAdv ;
   pAdv : Str -> Adv = ParadigmsAra.mkAdv ;
 
+  go_V = L.go_V ;
   stay_V = mkV "بقي" vi va  "بَقَاء" ;
   need_V2 = mkV2 (mkV "حوج" FormVIII) ;
   take_V2 = mkV2 (mkV "ءخذ" va vu "أَخْذ") ;
