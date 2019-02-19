@@ -1,10 +1,11 @@
 incomplete concrete DoctorFunctor of Doctor =
   open
     Syntax,
-    Lexicon
+    Lexicon,
+    Prelude
   in {
 lincat
-  Phrase = Utt ;
+  Phrase = Phr ; -- Arabic Utt has gender parameter
   Fact = Cl ;
   Action = VP ;
   Property = VP ;
@@ -15,15 +16,15 @@ lincat
   Illness = NP ;
 
 lin
-  presPosPhrase fact = mkUtt (mkS fact) ;
-  presNegPhrase fact = mkUtt (mkS negativePol fact) ;
-  pastPosPhrase fact = mkUtt (mkS anteriorAnt fact) ;
-  pastNegPhrase fact = mkUtt (mkS anteriorAnt negativePol fact) ;
-  presQuestionPhrase fact = mkUtt (mkQS (mkQCl fact)) ;
-  pastQuestionPhrase fact = mkUtt (mkQS anteriorAnt (mkQCl fact)) ;
+  presPosPhrase fact = mkPhr (mkUtt (mkS fact)) ;
+  presNegPhrase fact = mkPhr (mkUtt (mkS negativePol fact)) ;
+  pastPosPhrase fact = mkPhr (mkUtt (mkS anteriorAnt fact)) ;
+  pastNegPhrase fact = mkPhr (mkUtt (mkS anteriorAnt negativePol fact)) ;
+  presQuestionPhrase fact = let p : Phr = mkPhr (mkUtt (mkQS (mkQCl fact))) in p ** {s = invQMark ++ SOFT_BIND ++ p.s ++ SOFT_BIND ++ qMark} ;
+  pastQuestionPhrase fact = let p : Phr = mkPhr (mkUtt (mkQS anteriorAnt (mkQCl fact))) in p ** {s = invQMark ++ SOFT_BIND ++ p.s ++ SOFT_BIND ++ qMark} ;
 
-  impPosPhrase action = mkUtt (mkImp action) ;
-  impNegPhrase action = mkUtt negativePol (mkImp action) ;
+  impPosPhrase action = mkPhr (mkUtt (mkImp action)) ;
+  impNegPhrase action = mkPhr (mkUtt negativePol (mkImp action)) ;
 
   actionFact person action = mkCl person action ;
   propertyFact person property = mkCl person property ;

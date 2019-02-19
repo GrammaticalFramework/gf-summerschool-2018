@@ -4,7 +4,7 @@ concrete DoctorSpa of Doctor = DoctorFunctor - [
   Profession -- gender
     ,needProfessionProperty,theProfessionPerson
     ,isProfessionProperty,doctorProfession,
-  iFemPerson,youFemPerson]
+  iFemPerson,youFemPerson ]
   with (Syntax=SyntaxSpa),(Lexicon=LexiconSpa) **
   open
   ParadigmsSpa,
@@ -15,7 +15,6 @@ concrete DoctorSpa of Doctor = DoctorFunctor - [
   in {
 
 -- Functor overrides
-
 lincat
   Profession = AP ; -- for gender
 lin
@@ -24,7 +23,7 @@ lin
   isProfessionProperty profession = mkVP profession ;
 
   iFemPerson = mkNP iFem_Pron ;
-  youFemPerson = mkNP ExtendSpa.youFem_Pron ;
+  youFemPerson = mkNP youFem_Pron ;
 
 -- Lexicon
 
@@ -62,10 +61,10 @@ lin
     mkProfession : Str -> AP = \a -> mkAP (mkA a) ;
 
   lin
-  feverIllness        = mkNP a_Det (mkN "fiebre" feminine) ;
+  feverIllness        = mkNP (mkN "fiebre" feminine) ;
   fluIllness          = mkNP a_Det (mkN "gripe" feminine) ;
   headacheIllness     = mkNP a_Det (mkN (mkN "dolor") "de cabeza") ;
-  diarrheaIllness     = mkNP a_Det (mkN "diarrea") ;
+  diarrheaIllness     = mkNP (mkN "diarrea") ;
   heartDiseaseIllness = mkNP a_Det (mkCN (mkA "cardíaco") enfermedad_N) ;
   lungDiseaseIllness  = mkNP a_Det (mkCN (mkA "pulmonar") enfermedad_N) ;
   hypertensionIllness = mkNP (mkN "hipertensión") ;
@@ -87,5 +86,6 @@ oper
   ponerse_V2 = mkV2 (reflV poner_V) ;
   enfermedad_N = mkN "enfermedad" feminine ;
 
-
+  qMark : Str = "?" ;
+  invQMark : Str = "¿" ;
 } ;

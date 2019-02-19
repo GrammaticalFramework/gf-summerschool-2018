@@ -70,4 +70,7 @@ oper
   pullVerb = mkV "کشیدن" ;
   takeVerb = mkV "گرفتن" "گیر" ;
 
+  qMark : Str = "؟" ;
+  invQMark : Str = "" ;
+
 } ;

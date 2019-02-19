@@ -1,16 +1,22 @@
 --# -path=.:alltenses
 
-concrete DoctorAra of Doctor = DoctorFunctor - [drinkAction,sleepAction]
+concrete DoctorAra of Doctor = DoctorFunctor -
+  [ drinkAction,sleepAction
+  , iFemPerson, youFemPerson ]
   with
    (Syntax=SyntaxAra),
    (Lexicon=LexiconAra) **
   open
     ParadigmsAra,
+    ExtendAra,
     (L=LexiconAra),
     (R=ResAra)
   in {
 
 lin
+  iFemPerson = mkNP iFem_Pron ;
+  youFemPerson = mkNP youFem_Pron ;
+
   coughAction = mkVP (mkV "سعل" va vu  "سُعَالاَ") ;
   vomitAction = mkVP (mkV "قيء" FormV) ;
   sleepAction = mkVP ( mkV "نوم" va va "نَوْم") ;
@@ -78,6 +84,8 @@ oper
   respiratory_A = nisbaA "تَنَفُّس" ;
   head_N = mkN "رَأْس" "رُؤُوس" masc nohum ;
 
+  qMark : Str = "؟" ;
+  invQMark : Str = "" ;
 -- Compound noun where the head loses its place as head,
 -- and possessive suffix attaches to the attribute word
   compN : N -> N -> N = \n1,n2 -> n1 ** {
