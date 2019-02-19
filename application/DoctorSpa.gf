@@ -1,8 +1,11 @@
---# -path=.:alltenses:prelude
+--# -path=.:alltenses
 
 concrete DoctorSpa of Doctor = DoctorFunctor - [
-  Profession,needProfessionProperty,theProfessionPerson,isProfessionProperty,iFemPerson,youFemPerson]
-  with (Syntax=SyntaxSpa) **
+  Profession -- gender
+    ,needProfessionProperty,theProfessionPerson
+    ,isProfessionProperty,doctorProfession,
+  iFemPerson,youFemPerson]
+  with (Syntax=SyntaxSpa),(Lexicon=LexiconSpa) **
   open
   ParadigmsSpa,
   LexiconSpa,
@@ -25,14 +28,10 @@ lin
 
 -- Lexicon
 
-  coughAction = mkVP cough_V ;
-  breatheAction = mkVP (mkV "respirar") ;
+  coughAction = mkVP (mkV "toser") ;
   vomitAction = mkVP (mkV "vomitar") ;
-  sleepAction = mkVP sleep_V ;
-  undressAction = mkVP quitarse_V2 (mkNP the_Det ropa_N) ;
-  dressAction = mkVP ponerse_V2 (mkNP the_Det ropa_N) ;
-  eatAction = mkVP (mkV "comer") ;
-  drinkAction = mkVP (mkV "beber") ;
+  undressAction = mkVP quitarse_V2 ropa_NP ;
+  dressAction = mkVP ponerse_V2 ropa_NP ;
   smokeAction = mkVP (mkV "fumar") ;
   measureTemperatureAction = mkVP (mkV2 measure_V)
     (mkNP the_Det (mkCN (mkA "corporal") (mkN "temperatura"))) ;
@@ -50,8 +49,8 @@ lin
 
   bePregnantProperty = estarVP "embarazado" ;
   beIllProperty = estarVP "enfermo" ;
-  beWellProperty = estarVP "bien" ;
   beDeadProperty = estarVP "muerte" ;
+  beWellProperty = UseComp_estar (mkComp (pAdv "bien")) ;
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "alergia")) ;
   havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "dolor")) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "hijo")) ;
@@ -67,7 +66,7 @@ lin
   fluIllness          = mkNP a_Det (mkN "gripe" feminine) ;
   headacheIllness     = mkNP a_Det (mkN (mkN "dolor") "de cabeza") ;
   diarrheaIllness     = mkNP a_Det (mkN "diarrea") ;
-  heartDiseaseIllness = mkNP a_Det (mkCN (mkA "cardíaca") enfermedad_N) ;
+  heartDiseaseIllness = mkNP a_Det (mkCN (mkA "cardíaco") enfermedad_N) ;
   lungDiseaseIllness  = mkNP a_Det (mkCN (mkA "pulmonar") enfermedad_N) ;
   hypertensionIllness = mkNP (mkN "hipertensión") ;
 
@@ -78,15 +77,14 @@ lin
 oper
   pAdv : Str -> Adv = ParadigmsSpa.mkAdv ;
   take_V2 = mkV2 (mkV "tomar") ;
-  cough_V = mkV "toser" ;
+  stay_V = mkV "quedar" ;
+  vaccinate_V2 = mkV2 (mkV "vacunar") ;
   examine_V2 = mkV2 (mkV "examinar") ;
   measure_V = medir_V ;
   need_V2 = mkV2 (mkV "necesitar") ;
-  ropa_N = mkN "ropa" ;
-  stay_V = mkV "quedar" ;
+  ropa_NP = mkNP the_Det (mkN "ropa") ;
   quitarse_V2 = mkV2 (reflV (mkV "quitar")) ;
   ponerse_V2 = mkV2 (reflV poner_V) ;
-  vaccinate_V2 = mkV2 (mkV "vacunar") ;
   enfermedad_N = mkN "enfermedad" feminine ;
 
 

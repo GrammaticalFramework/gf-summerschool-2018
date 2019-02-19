@@ -1,6 +1,7 @@
 incomplete concrete DoctorFunctor of Doctor =
   open
-    Syntax
+    Syntax,
+    Lexicon
   in {
 lincat
   Phrase = Utt ;
@@ -41,9 +42,18 @@ lin
   hePerson = he_NP ;
   shePerson = she_NP ;
 
-  goToAction place = mkVP (mkVP go_V) place.to ;
+  goToAction place = mkVP (mkVP Lexicon.go_V) place.to ;
   stayAtAction place = mkVP (mkVP stay_V) place.at ;
   vaccinateAction person = mkVP vaccinate_V2 person ;
   examineAction person = mkVP examine_V2 person ;
   takeSubstanceAction substance = mkVP take_V2 substance ;
+
+  sleepAction = mkVP Lexicon.sleep_V ;
+  breatheAction = mkVP Lexicon.breathe_V ;
+  eatAction = mkVP <Lexicon.eat_V2 : V> ;
+  drinkAction = mkVP <Lexicon.drink_V2 : V> ;
+
+  doctorProfession = mkCN Lexicon.doctor_N ;
+  haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det Lexicon.child_N) ;
+
 }

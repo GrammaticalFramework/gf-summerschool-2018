@@ -1,6 +1,9 @@
 --# -path=.:alltenses
 
-concrete DoctorAra of Doctor = DoctorFunctor with (Syntax=SyntaxAra) **
+concrete DoctorAra of Doctor = DoctorFunctor - [drinkAction,sleepAction]
+  with
+   (Syntax=SyntaxAra),
+   (Lexicon=LexiconAra) **
   open
     ParadigmsAra,
     (L=LexiconAra),
@@ -9,13 +12,11 @@ concrete DoctorAra of Doctor = DoctorFunctor with (Syntax=SyntaxAra) **
 
 lin
   coughAction = mkVP (mkV "سعل" va vu  "سُعَالاَ") ;
-  breatheAction = mkVP (mkV "نفس" FormV) ;
   vomitAction = mkVP (mkV "قيء" FormV) ;
   sleepAction = mkVP ( mkV "نوم" va va "نَوْم") ;
   undressAction = mkVP take_off_V2 (mkNP thePl_Det clothes_N) ;
   dressAction = mkVP put_on_V2 (mkNP thePl_Det clothes_N) ;
-  eatAction = mkVP <L.eat_V2 : V> ;
-  drinkAction = mkVP (mkV "شرب" vi va "شُرْب") ;
+  drinkAction = mkVP (mkV "شرب" vi va "شُرْب") ; -- TODO fix masdars in RG
   smokeAction = mkVP (mkV "دخن" FormII) ;
   measureTemperatureAction = mkVP measure_V2 (mkNP the_Det temperature_N) ;
   measureBloodPressureAction = mkVP measure_V2 (mkNP the_Det blood_pressure_N) ;
@@ -25,7 +26,6 @@ lin
   schoolPlace = {at = sAdv in_Prep school_NP ; to = sAdv liPrep school_NP} ;
   workPlace = {at = sAdv in_Prep work_NP ; to = sAdv liPrep work_NP} ;
 
-  doctorProfession = mkCN L.doctor_N ;
   nurseProfession = mkCN (mkN "مُمَرِّضَة") ;
   interpreterProfession = mkCN (mkN "مُتَرْجِم") ;
 
@@ -35,7 +35,6 @@ lin
   beDeadProperty = mkVP (mkA "ميت" "فَعّل") ;
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "حَسَاسِيَّة")) ;
   havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "أَلَم" "آلَام" masc nohum)) ;
-  haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det L.child_N) ;
 
   feverIllness = mkNP a_Det (mkN "حَرَارة") ;
   fluIllness = mkNP a_Det (mkN "إِنْفْلُوِنْزَا") ; ---- Wiktionary
@@ -53,7 +52,6 @@ oper
   sAdv : Prep -> NP -> Adv = SyntaxAra.mkAdv ;
   pAdv : Str -> Adv = ParadigmsAra.mkAdv ;
 
-  go_V = L.go_V ;
   stay_V = mkV "بقي" vi va  "بَقَاء" ;
   need_V2 = mkV2 (mkV "حوج" FormVIII) ;
   take_V2 = mkV2 (mkV "ءخذ" va vu "أَخْذ") ;
