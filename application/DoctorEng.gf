@@ -5,7 +5,8 @@
 concrete DoctorEng of Doctor =
   open
     MiniSyntaxEng,
-    MiniParadigmsEng
+    MiniParadigmsEng,
+    Prelude
   in {
 
 -------------------
@@ -27,15 +28,18 @@ lin
   presNegPhrase fact = mkUtt (mkS negativePol fact) ;
   pastPosPhrase fact = mkUtt (mkS anteriorAnt fact) ;
   pastNegPhrase fact = mkUtt (mkS anteriorAnt negativePol fact) ;
-  presQuestionPhrase fact = mkUtt (mkQS (mkQCl fact)) ;
-  pastQuestionPhrase fact = mkUtt (mkQS anteriorAnt (mkQCl fact)) ;
+  -- presQuestionPhrase fact = mkUtt (mkQS (mkQCl fact)) ;
+  -- pastQuestionPhrase fact = mkUtt (mkQS anteriorAnt (mkQCl fact)) ;
+  presQuestionPhrase fact = let p : Utt = mkUtt (mkQS (mkQCl fact)) in p ** {s = p.s ++ SOFT_BIND ++ "?"} ;
+  pastQuestionPhrase fact = let p : Utt = mkUtt (mkQS anteriorAnt (mkQCl fact)) in p ** {s = p.s ++ SOFT_BIND ++ "?"} ;
+
 
   impPosPhrase action = mkUtt (mkImp action) ;
   impNegPhrase action = mkUtt negativePol (mkImp action) ;
 
   actionFact person action = mkCl person action ;
   propertyFact person property = mkCl person property ;
-  
+
   isProfessionProperty profession = mkVP (mkNP a_Det profession) ;
   needProfessionProperty profession = mkVP need_V2 (mkNP a_Det profession) ;
   isAtPlaceProperty place = mkVP place.at ;
@@ -70,7 +74,7 @@ lin
   smokeAction = mkVP (mkV "smoke") ;
   measureTemperatureAction = mkVP (mkV2 (mkV "measure")) (mkNP the_Det (mkN "body temperature")) ;
   measureBloodPressureAction = mkVP (mkV2 (mkV "measure")) (mkNP the_Det (mkN "blood pressure")) ;
-  
+
   hospitalPlace = {at = pAdv "at the hospital" ; to = pAdv "to the hospital"} ;
   homePlace = {at = pAdv "at home" ; to = pAdv "home"} ;
   schoolPlace = {at = pAdv "at school" ; to = pAdv "to school"} ;
@@ -87,7 +91,7 @@ lin
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergy")) ;
   havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "pain")) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "child" "children")) ;
-  
+
   feverIllness = mkNP a_Det (mkN "fever") ;
   fluIllness = mkNP a_Det (mkN "flu") ;
   headacheIllness = mkNP a_Det (mkN "headache") ;

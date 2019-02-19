@@ -3,7 +3,8 @@
 concrete DoctorSwe of Doctor =
   open
     SyntaxSwe,
-    ParadigmsSwe
+    ParadigmsSwe,
+    Prelude
   in {
 
 -------------------
@@ -26,15 +27,17 @@ lin
   presNegPhrase fact = mkUtt (mkS negativePol fact) ;
   pastPosPhrase fact = mkUtt (mkS anteriorAnt fact) ;
   pastNegPhrase fact = mkUtt (mkS anteriorAnt negativePol fact) ;
-  presQuestionPhrase fact = mkUtt (mkQS (mkQCl fact)) ;
-  pastQuestionPhrase fact = mkUtt (mkQS anteriorAnt (mkQCl fact)) ;
+  -- presQuestionPhrase fact = mkUtt (mkQS (mkQCl fact)) ;
+  -- pastQuestionPhrase fact = mkUtt (mkQS anteriorAnt (mkQCl fact)) ;
+  presQuestionPhrase fact = let p : Utt = mkUtt (mkQS (mkQCl fact)) in p ** {s = p.s ++ SOFT_BIND ++ "?"} ;
+  pastQuestionPhrase fact = let p : Utt = mkUtt (mkQS anteriorAnt (mkQCl fact)) in p ** {s = p.s ++ SOFT_BIND ++ "?"} ;
 
   impPosPhrase action = mkUtt (mkImp action) ;
   impNegPhrase action = mkUtt negativePol (mkImp action) ;
 
   actionFact person action = mkCl person action ;
   propertyFact person property = mkCl person property ;
-  
+
   isProfessionProperty profession = mkVP (mkNP profession) ; -- the only difference from Eng
   needProfessionProperty profession = mkVP need_V2 (mkNP a_Det profession) ;
   isAtPlaceProperty place = mkVP place.at ;
@@ -85,7 +88,7 @@ lin
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "allergi" "allergier")) ;
   havePainsProperty = mkVP have_V2 (mkNP aPl_Det (mkN "smärta")) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det (mkN "barn" "barn")) ;
-  
+
   feverIllness = mkNP (mkN "feber") ;
   fluIllness = mkNP a_Det (mkN "förkylning") ;
   headacheIllness = mkNP (mkN "huvudvärk" "huvudvärkar") ;
