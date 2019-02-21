@@ -17,9 +17,9 @@ lin
     (mkNP the_Det (mkN "فشارخون" )) ;
 
   hospitalPlace = {at = pAdv "در بیمارستان" ; to = pAdv "به بیمارستان"} ;
-  homePlace = {at = pAdv "در خانه" ; to = pAdv "خانه"} ;
+  homePlace = {at = pAdv "در خانه" ; to = pAdv "به خانه"} ;
   schoolPlace = {at = pAdv "در مدرسه" ; to = pAdv "به مدرسه"} ;
-  workPlace = {at = pAdv "در شغل" ; to = pAdv "به شغل"} ;
+  workPlace = {at = pAdv "در محل کار" ; to = pAdv "به محل کار"} ;
 
   nurseProfession       = mkCN (mkN "پرستار") ;
   interpreterProfession = mkCN (mkN "مترجم") ;
@@ -27,7 +27,7 @@ lin
   bePregnantProperty = mkVP (mkA "حامله") ;
   beIllProperty = mkVP (mkA "بیمار") ;
   beWellProperty = mkVP (mkAdv good_A) ; ----
-  beDeadProperty = mkVP (mkA "مرده") ;
+  beDeadProperty = mkVP die_V ;
   haveAllergiesProperty = mkVP have_V2 (mkNP aPl_Det (mkN "حساسیت")) ;
   havePainsProperty = mkVP have_V2 (mkNP aPl_Det pain_N) ;
   haveChildrenProperty = mkVP have_V2 (mkNP aPl_Det L.child_N) ;
@@ -47,17 +47,17 @@ lin
 
 oper
   pAdv : Str -> Adv = ParadigmsPes.mkAdv ;
-  take_V2 = mkV2 takeVerb ;
+  take_V2 = mkV2 takeVerb (mkPrep "") ;
   cough_V = compoundV "سرفه" doVerb ;
   vomit_V = compoundV "استفراغ" doVerb ;
   examine_V2 = mkV2 (compoundV "معاینه" doVerb) ;
   measure_V = compoundV "اندازه" takeVerb ;
-  need_V2 = mkV2 (compoundV "احتیاج" haveVerb) ;
+  need_V2 = mkV2 (compoundV "احتیاج" haveVerb) (mkPrep "به") ;
   clothes_N = mkN "لباس" ;
   stay_V = mkV "ماندن" ;
   remove_V2 = mkV2 (mkV "درآوردن") ;
   put_on_V2 = mkV2 (mkV "پوشیدن") ;
-  vaccinate_V2 = mkV2 (compoundV "واکسیناسیون" doVerb) ;
+  vaccinate_V2 = mkV2 (compoundV "واکسینه" doVerb) ;
   disease_N = mkN "بیماری" ;
   pulmonary_A = mkA "ریوی" ;
   cardiac_A = mkA "قلبی" ;
