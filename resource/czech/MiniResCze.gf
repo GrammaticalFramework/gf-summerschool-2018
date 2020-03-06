@@ -11,7 +11,8 @@ oper
   softConsonant : pattern Str = #("ť"|"ď"|"j"|"ň"|"ř"|"š"|"c"|"č"|"ž") ;
 
   dropFleetingE : Str -> Str = \s -> case s of {
-    x + "e" + c@("k"|"c"|"ň") => x + c ;
+    x + "e" + c@("k"|"c") => x + c ;
+    x + "e" + "ň" => x + "n" ;
     _ => s
     } ;
 
@@ -104,6 +105,8 @@ oper
       <Neutr,_,      _ + "í"           , _ + "í"> => declSTAVENI ;
       _ => Predef.error ("cannot infer declension type for" ++ nom ++ gen)
       } ;
+
+-- source: https://en.wikipedia.org/wiki/Czech_declension
 
   declPAN : DeclensionType = \pan ->
     mkrNoun {
@@ -205,41 +208,35 @@ oper
   declSOUDCE : DeclensionType = \soudce ->
     let soudc = init soudce
     in
-    mkNoun
-      soudce
-      (soudce)
-      (soudc + "ovi") --- soudci
-      (soudce)
-      (shortenVowel soudce) ----
-      (soudc + "ovi") --- soudci
-      (soudc + "em")
+    mkrNoun {
+      snom,sgen,sacc,svoc = soudce ;        ---- pacc
+      sdat,sloc           = soudc + "ovi" ; --- soudci
+      sins                = soudc + "em" ;
 
-      (soudc + "ové") --- soudci
-      (soudc + "ů")
-      (soudc + "ům")
-      (soudc + "e")
-      (soudc + "ích")
-      (soudc + "i")
+      pnom                = soudc + "ové" ; --- soudci
+      pgen                = soudc + "ů" ;
+      pdat                = soudc + "ům" ;
+      pacc                = soudce ;
+      ploc                = soudc + "ích" ;
+      pins                = soudc + "i"
+      }
       Masc
-      Anim ----
+      Anim
       ;
 
   declSTROJ : DeclensionType = \stroj ->
-    mkNoun
-      stroj
-      (stroj + "e")
-      (stroj + "i")
-      (stroj)
-      (shortenVowel stroj + "i") ----
-      (stroj + "i")
-      (stroj + "em")
+    mkrNoun {
+      snom,sacc      = stroj ;
+      sgen           = stroj + "e" ; --- pnom,pacc
+      sdat,svoc,sloc = stroj + "i" ; --- pins ---- svoc shorten?
+      sins           = stroj + "em" ;
 
-      (stroj + "e")
-      (stroj + "ů")
-      (stroj + "ům")
-      (stroj + "e")
-      (stroj + "ích")
-      (stroj + "i")
+      pnom,pacc      = stroj + "e" ;
+      pgen           = stroj + "ů" ;
+      pdat           = stroj + "ům" ;
+      ploc           = stroj + "ích" ;
+      pins           = stroj + "i"
+      }
       Masc
       Inanim
       ;
@@ -247,83 +244,67 @@ oper
   declRUZE : DeclensionType = \ruze ->
     let ruz = init ruze
     in
-    mkNoun
-      ruze
-      (ruze)
-      (ruz + "i")
-      (ruz + "i")
-      (ruz + "e") -- no shortening
-      (ruz + "i")
-      (ruz + "i")
+    mkrNoun {
+      snom,sgen,svoc      = ruze ; --- pnom,pacc
+      sdat,sacc,sloc,sins = ruz + "i" ; 
 
-      (ruze)
-      (ruz + "í")
-      (ruz + "ím")
-      (ruz + "e")
-      (ruz + "ích")
-      (ruz + "emi")
+      pnom,pacc = ruze ;
+      pgen      = ruz + "í" ;
+      pdat      = ruz + "ím" ;
+      ploc      = ruz + "ích" ;
+      pins      = ruz + "emi"
+      }
+      Fem
+      Inanim
+      ;
+
+  declPISEN : DeclensionType = \pisen ->
+    let pisn = dropFleetingE pisen 
+    in
+    mkrNoun {
+      snom,sacc      = pisen ;
+      sgen           = pisn + "ě" ;
+      sdat,svoc,sloc = pisn + "i" ; -- not shortened
+      sins           = pisn + "í" ;
+
+      pnom,pacc      = pisn + "ě" ;
+      pgen           = pisn + "í" ;
+      pdat           = pisn + "ím" ;
+      ploc           = pisn + "ích" ;
+      pins           = pisn + "ěmi"
+      }
       Fem
       Inanim ----
       ;
 
-  declPISEN : DeclensionType = \pan ->
-    mkNoun
-      pan
-      (pan + "a")
-      (pan + "ovi") --- pánu
-      (pan + "a")
-      (shortenVowel pan + "e")
-      (pan + "ovi") --- pánu
-      (pan + "em")
+  declKOST : DeclensionType = \kost ->
+    mkrNoun {
+      snom,sacc           = kost ;
+      sgen,sdat,svoc,sloc = kost + "i" ; --- pnom,pacc
+      sins                = kost + "í" ; --- pgen
 
-      (pan + "ové") --- páni
-      (pan + "ů")
-      (pan + "ům")
-      (pan + "y")
-      (pan + "ech")
-      (pan + "y")
-      Masc
-      Anim
+      pnom,pacc      = kost + "i" ;
+      pgen           = kost + "í" ;
+      pdat           = kost + "em" ;
+      ploc           = kost + "ech" ;
+      pins           = kost + "mi"
+      }
+      Fem
+      Inanim ----
       ;
 
-  declKOST : DeclensionType = \pan ->
-    mkNoun
-      pan
-      (pan + "a")
-      (pan + "ovi") --- pánu
-      (pan + "a")
-      (shortenVowel pan + "e")
-      (pan + "ovi") --- pánu
-      (pan + "em")
+  declSTAVENI : DeclensionType = \staveni ->
+    mkrNoun {
+      snom,sgen,sdat,sacc,svoc,sloc = staveni ;
+      sins                          = staveni + "m" ;
 
-      (pan + "ové") --- páni
-      (pan + "ů")
-      (pan + "ům")
-      (pan + "y")
-      (pan + "ech")
-      (pan + "y")
-      Masc
-      Anim
-      ;
-
-  declSTAVENI : DeclensionType = \pan ->
-    mkNoun
-      pan
-      (pan + "a")
-      (pan + "ovi") --- pánu
-      (pan + "a")
-      (shortenVowel pan + "e")
-      (pan + "ovi") --- pánu
-      (pan + "em")
-
-      (pan + "ové") --- páni
-      (pan + "ů")
-      (pan + "ům")
-      (pan + "y")
-      (pan + "ech")
-      (pan + "y")
-      Masc
-      Anim
+      pnom,pgen,pacc = staveni ;
+      pdat           = staveni + "m" ;
+      ploc           = staveni + "ch" ;
+      pins           = staveni + "mi"
+      }
+      Neutr
+      Inanim ----
       ;
 
 }
