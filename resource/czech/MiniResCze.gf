@@ -2,8 +2,10 @@ resource MiniResCze = open Prelude in {
 
 param
   Number = Sg | Pl ;
-  Gender = Masc | Fem | Neutr ;
+
   Animacy = Anim | Inanim ;
+  Gender = Masc Animacy | Fem | Neutr ;
+
   Case = Nom | Gen | Dat | Acc | Voc | Loc | Ins ; -- traditional order
 
 oper
@@ -27,39 +29,12 @@ oper
     _ => s
     } ;
 
-  Noun : Type = {s : Number => Case => Str ; g : Gender ; a : Animacy} ;
+  Noun : Type = {s : Number => Case => Str ; g : Gender} ;
 
   mkNoun :
-    (snom,sgen,sdat,sacc,svoc,sloc,sins, pnom,pgen,pdat,pacc,ploc,pins : Str) ->
-      Gender -> Animacy -> Noun
-    = \snom,sgen,sdat,sacc,svoc,sloc,sins, pnom,pgen,pdat,pacc,ploc,pins, g,a -> {
-      s = table {
-        Sg => table {
-	  Nom => snom ;
-	  Gen => sgen ;
-	  Dat => sdat ;
-	  Acc => sacc ;
-	  Voc => svoc ;
-	  Loc => sloc ;
-	  Ins => sins
-	  } ;
-        Pl => table {
-	  Nom | Voc => pnom ;
-	  Gen => pgen ;
-	  Dat => pdat ;
-	  Acc => pacc ;
-	  Loc => ploc ;
-	  Ins => pins
-	  }
-	} ;
-      g = g ;
-      a = a
-      } ;
-      
-  mkrNoun :
     {snom,sgen,sdat,sacc,svoc,sloc,sins, pnom,pgen,pdat,pacc,ploc,pins : Str} ->
-      Gender -> Animacy -> Noun
-    = \forms, g,a -> {
+      Gender -> Noun
+    = \forms, g -> {
       s = table {
         Sg => table {
 	  Nom => forms.snom ;
@@ -79,37 +54,36 @@ oper
 	  Ins => forms.pins
 	  }
 	} ;
-      g = g ;
-      a = a
+      g = g
       } ;
 
 
   DeclensionType : Type = Str -> Noun ;
   
-  declensionType : (nom,gen : Str) -> Gender -> Animacy -> DeclensionType
-    = \nom,gen,g,a -> case <g,a,nom, gen> of {
-      <Masc, Anim,   _ + #hardConsonant, _ + "a"> => declPAN ;
-      <Masc, Anim,   _ + "a"           , _ + "a"> => declPAN ;
-      <Masc, Inanim, _ + #hardConsonant, _ + "u"> => declHRAD ;
-      <Fem,  _,      _ + "a"           , _ + "y"> => declZENA ;
-      <Neutr,_,      _ + "o"           , _ + "a"> => declMESTO ;
-      <Masc, Anim,   _ + #softConsonant, _ + "e"> => declMUZ ;
-      <Masc, Anim,   _ + "tel"         , _ + "e"> => declMUZ ;
-      <Masc, Anim,   _ + "ce"          , _ + "e"> => declSOUDCE ;
-      <Masc, Inanim, _ + #softConsonant, _ + "e"> => declSTROJ ;
-      <Fem,  _,      _ + "e"           , _ + "e"> => declRUZE ;
-      <Fem,  _,      _ + #softConsonant, _ + "e"> => declPISEN ;
-      <Fem,  _,      _ + "ost"         , _ + "i"> => declKOST ;
-      <Neutr,_,      _ + "e"           , _ + "e"> => declMESTO ;
-      --- but also KURE for "young animals, devce (girl)"
-      <Neutr,_,      _ + "í"           , _ + "í"> => declSTAVENI ;
+  declensionType : (nom,gen : Str) -> Gender -> DeclensionType
+    = \nom,gen,g -> case <g, nom, gen> of {
+      <Masc Anim,   _ + #hardConsonant, _ + "a"> => declPAN ;
+      <Masc Anim,   _ + "a"           , _ + "a"> => declPAN ;
+      <Masc Inanim, _ + #hardConsonant, _ + "u"> => declHRAD ;
+      <Fem,         _ + "a"           , _ + "y"> => declZENA ;
+      <Neutr,       _ + "o"           , _ + "a"> => declMESTO ;
+      <Masc Anim,   _ + #softConsonant, _ + "e"> => declMUZ ;
+      <Masc Anim,   _ + "tel"         , _ + "e"> => declMUZ ;
+      <Masc Anim,   _ + "ce"          , _ + "e"> => declSOUDCE ;
+      <Masc Inanim, _ + #softConsonant, _ + "e"> => declSTROJ ;
+      <Fem,         _ + "e"           , _ + "e"> => declRUZE ;
+      <Fem,         _ + #softConsonant, _ + "e"> => declPISEN ;
+      <Fem,         _ + "ost"         , _ + "i"> => declKOST ;
+      <Neutr,       _ + "e"           , _+"ete"> => declKURE ;
+      <Neutr,       _ + "e"           , _ + "e"> => declMORE ;
+      <Neutr,       _ + "í"           , _ + "í"> => declSTAVENI ;
       _ => Predef.error ("cannot infer declension type for" ++ nom ++ gen)
       } ;
 
 -- source: https://en.wikipedia.org/wiki/Czech_declension
 
   declPAN : DeclensionType = \pan ->
-    mkrNoun {
+    mkNoun {
       snom      = pan ;
       sgen,sacc = pan + "a" ;
       sdat,sloc = pan + "ovi" ; --- pánu
@@ -122,12 +96,11 @@ oper
       pacc,pins = pan + "y" ;
       ploc      = pan + "ech"
       }
-      Masc
-      Anim
+      (Masc Anim)
       ;
 
   declHRAD : DeclensionType = \hrad ->
-    mkrNoun {
+    mkNoun {
       snom,sacc = hrad ;
       sgen,sdat = hrad + "u" ;
       sloc      = hrad + "u" ; --- hradě
@@ -139,14 +112,13 @@ oper
       pdat           = hrad + "ům" ;
       ploc           = hrad + "ech" 
       }
-      Masc
-      Inanim
+      (Masc Inanim)
       ;
 
   declZENA : DeclensionType = \zena ->
     let zen = init zena
     in
-    mkrNoun {
+    mkNoun {
       snom      = zena ;
       sgen      = zen + "y" ;
       sdat,sloc = zen + "ě" ;
@@ -161,13 +133,12 @@ oper
       pins      = zen + "ami"
       }
       Fem
-      Anim ----
       ;
 
   declMESTO : DeclensionType = \mesto ->
     let mest = init mesto
     in
-    mkrNoun {
+    mkNoun {
       snom,sacc = mesto ;                   ---- svoc?
       sgen      = mest + "a" ;
       sdat      = mest + "u" ;
@@ -182,11 +153,10 @@ oper
       pins      = mest + "y"
       }
       Neutr
-      Inanim ----
       ;
 
   declMUZ : DeclensionType = \muz ->
-    mkrNoun {
+    mkNoun {
       snom      = muz ;
       sgen,sacc = muz + "e" ;   --- pacc
       sdat      = muz + "ovi" ; --- muzi
@@ -201,14 +171,13 @@ oper
       ploc = muz + "ích" ;
       pins = muz + "i"
       }
-      Masc
-      Anim
+      (Masc Anim)
       ;
 
   declSOUDCE : DeclensionType = \soudce ->
     let soudc = init soudce
     in
-    mkrNoun {
+    mkNoun {
       snom,sgen,sacc,svoc = soudce ;        ---- pacc
       sdat,sloc           = soudc + "ovi" ; --- soudci
       sins                = soudc + "em" ;
@@ -220,12 +189,11 @@ oper
       ploc                = soudc + "ích" ;
       pins                = soudc + "i"
       }
-      Masc
-      Anim
+      (Masc Anim)
       ;
 
   declSTROJ : DeclensionType = \stroj ->
-    mkrNoun {
+    mkNoun {
       snom,sacc      = stroj ;
       sgen           = stroj + "e" ; --- pnom,pacc
       sdat,svoc,sloc = stroj + "i" ; --- pins ---- svoc shorten?
@@ -237,14 +205,13 @@ oper
       ploc           = stroj + "ích" ;
       pins           = stroj + "i"
       }
-      Masc
-      Inanim
+      (Masc Inanim)
       ;
 
   declRUZE : DeclensionType = \ruze ->
     let ruz = init ruze
     in
-    mkrNoun {
+    mkNoun {
       snom,sgen,svoc      = ruze ; --- pnom,pacc
       sdat,sacc,sloc,sins = ruz + "i" ; 
 
@@ -255,13 +222,12 @@ oper
       pins      = ruz + "emi"
       }
       Fem
-      Inanim
       ;
 
   declPISEN : DeclensionType = \pisen ->
     let pisn = dropFleetingE pisen 
     in
-    mkrNoun {
+    mkNoun {
       snom,sacc      = pisen ;
       sgen           = pisn + "ě" ;
       sdat,svoc,sloc = pisn + "i" ; -- not shortened
@@ -274,11 +240,10 @@ oper
       pins           = pisn + "ěmi"
       }
       Fem
-      Inanim ----
       ;
 
   declKOST : DeclensionType = \kost ->
-    mkrNoun {
+    mkNoun {
       snom,sacc           = kost ;
       sgen,sdat,svoc,sloc = kost + "i" ; --- pnom,pacc
       sins                = kost + "í" ; --- pgen
@@ -290,11 +255,45 @@ oper
       pins           = kost + "mi"
       }
       Fem
-      Inanim ----
       ;
 
+  declKURE : DeclensionType = \kure ->
+    let kur = init kure
+    in
+    mkNoun {
+      snom,sacc,svoc = kure ;
+      sgen           = kur  + "ete" ;
+      sdat,sloc      = kur  + "eti" ;
+      sins           = kur  + "etem" ;
+
+      pnom,pacc = kur + "ata" ;
+      pgen      = kur + "at" ;
+      pdat      = kur + "atům" ;
+      ploc      = kur + "atech" ;
+      pins      = kur + "aty"
+      }
+      Neutr
+      ;
+      
+  declMORE : DeclensionType = \more ->
+    let mor = init more
+    in
+    mkNoun {
+      snom,sgen,sacc,svoc = more ;      --- pnom
+      sdat,sloc           = mor + "i" ; --- pins
+      sins                = mor + "em" ;
+
+      pnom,pacc = more ;
+      pgen      = mor + "í" ;
+      pdat      = mor + "ím" ;
+      ploc      = mor + "ích" ;
+      pins      = mor + "i"
+      }
+      Neutr
+      ;
+      
   declSTAVENI : DeclensionType = \staveni ->
-    mkrNoun {
+    mkNoun {
       snom,sgen,sdat,sacc,svoc,sloc = staveni ;
       sins                          = staveni + "m" ;
 
@@ -304,7 +303,6 @@ oper
       pins           = staveni + "mi"
       }
       Neutr
-      Inanim ----
       ;
 
 }
