@@ -1,5 +1,8 @@
 resource MiniResCze = open Prelude in {
 
+
+-- parameters
+
 param
   Number = Sg | Pl ;
 
@@ -7,6 +10,8 @@ param
   Gender = Masc Animacy | Fem | Neutr ;
 
   Case = Nom | Gen | Dat | Acc | Voc | Loc | Ins ; -- traditional order
+
+-- phonology
 
 oper
   hardConsonant : pattern Str = #("d"|"t"|"g"|"h"|"k"|"n"|"r") ;
@@ -61,8 +66,13 @@ oper
     } ; 
 		    
 ---------------
+-- parts of speech
 
-  Noun : Type = {s : Number => Case => Str ; g : Gender} ;
+  Noun      : Type = {s : Number => Case => Str ; g : Gender} ;
+  Adjective : Type = {s,compar,superl : Gender => Number => Case => Str ; short : Gender => Str} ;
+
+---------------
+-- noun paradigms
 
   mkNoun :
     {snom,sgen,sdat,sacc,svoc,sloc,sins, pnom,pgen,pdat,pacc,ploc,pins : Str} ->
@@ -368,5 +378,41 @@ oper
       }
       Neutr
       ;
+
+---------------------------
+-- Adjective paradigms
+
+  AdjForms : Type = {
+    msnom, fsnom, nsnom : Str ; -- svoc = snom
+    msgen, fsgen : Str ;        -- nsgen = msgen
+    msdat, fsdat : Str ;        -- nsdat = msdat
+    fsacc : Str ;               -- amsacc = msgen, imsacc = msnom, nsacc = nsnom
+    msloc : Str ;               -- fsloc = fsdat, nsloc = msloc
+    msins, fsins : Str ;        -- nsins = msins, pdat = msins
+
+    mpnom,fpnom : Str ;         -- pvoc = pnom, impnom = fpnom, npnom = fsnom
+    pgen : Str ;                -- ploc = pgen
+    pacc : Str ;                -- fpacc = mpacc = pacc ; npacc = npnom 
+    pins : Str ;
+    } ;
+
+-- hard declension
+
+  mladyAdjForms : Str -> AdjForms = \mlady ->
+    let mlad = init mlady
+    in {
+      msnom                              = mlad + "ý" ;
+      fsnom                              = mlad + "á" ;
+      nsnom,fsgen,fsdat,fsins,fpnom,pacc = mlad + "é" ;
+      msgen                              = mlad + "ého" ;
+      msdat                              = mlad + "ému" ;
+      fsacc,fsins                        = mlad + "ou" ;
+      msloc                              = mlad + "ém" ;
+      msins,pdat                         = mlad + "ým" ;
+      mpnom                              = mlad + "í" ;
+      pgen                               = mlad + "ých" ;
+      pins                               = mlad + "ými" ;
+      } ;
+
 
 }
