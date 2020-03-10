@@ -42,6 +42,12 @@ oper
     pan => pan + "i"
     } ;
 
+  addAdjI : Str -> Str = \s -> case s of {
+    angli + "ck"  => angli + "čtí" ;
+    ce    + "sk"  => ce    + "ští" ;
+    _ => init (addI s) + "í"
+    } ;
+
   -- 3.4.10, in particular when also final 'a' is dropped
   addE : Str -> Str = \s -> case s of {
     re + "k"   => re + "ce" ;
@@ -66,13 +72,9 @@ oper
     } ; 
 		    
 ---------------
--- parts of speech
+-- Nouns
 
   Noun      : Type = {s : Number => Case => Str ; g : Gender} ;
-  Adjective : Type = {s,compar,superl : Gender => Number => Case => Str ; short : Gender => Str} ;
-
----------------
--- noun paradigms
 
   mkNoun :
     {snom,sgen,sdat,sacc,svoc,sloc,sins, pnom,pgen,pdat,pacc,ploc,pins : Str} ->
@@ -380,11 +382,16 @@ oper
       ;
 
 ---------------------------
--- Adjective paradigms
+-- Adjectives
+
+-- to be used for AP: 56 forms for each degree
+  Adjective : Type = {s : Gender => Number => Case => Str} ; 
+
+-- to be used for A, in three degrees: 15 forms in each
 
   AdjForms : Type = {
     msnom, fsnom, nsnom : Str ; -- svoc = snom
-    msgen, fsgen : Str ;        -- nsgen = msgen
+    msgen, fsgen : Str ;        -- nsgen = msgen, pacc = fsgen
     msdat, fsdat : Str ;        -- nsdat = msdat
     fsacc : Str ;               -- amsacc = msgen, imsacc = msnom, nsacc = nsnom
     msloc : Str ;               -- fsloc = fsdat, nsloc = msloc
@@ -392,8 +399,41 @@ oper
 
     mpnom,fpnom : Str ;         -- pvoc = pnom, impnom = fpnom, npnom = fsnom
     pgen : Str ;                -- ploc = pgen
-    pacc : Str ;                -- fpacc = mpacc = pacc ; npacc = npnom 
     pins : Str ;
+    } ;
+
+adjFormsAdjective : AdjForms -> Adjective = \afs -> {
+  s = \\g,n,c => case <n,c,g> of {
+  
+    <Sg, Nom|Voc, Masc _>
+      | <Sg, Acc, Masc Inanim>   => afs.msnom ;
+    <Sg, Nom|Voc, Fem>
+      | <Pl, Nom|Acc|Voc, Neutr> => afs.fsnom ;
+    <Sg, Nom|Acc|Voc, Neutr>     => afs.nsnom ;
+    
+    <Sg, Gen, Masc _ | Neutr>
+      | <Sg,Acc,Masc Anim>     => afs.msgen ;
+    <Sg, Gen, Fem>
+      | <Pl,Acc,Masc _|Fem>    => afs.fsgen ;
+    
+    <Sg, Dat, Masc _|Neutr>    => afs.msdat ;
+    <Sg, Dat|Loc, Fem>         => afs.fsdat ;
+
+    <Sg, Acc, Fem>             => afs.fsacc ;
+    
+    <Sg, Loc, Masc _|Neutr>    => afs.msloc ;
+    
+    <Sg, Ins, Masc _|Neutr>
+      | <Pl,Dat,_>             => afs.msins ;
+    <Sg, Ins, Fem>             => afs.fsins ;
+
+    <Pl, Nom|Voc, Masc Anim>       => afs.mpnom ;
+    <Pl, Nom|Voc, Masc Inanim|Fem> => afs.fpnom ;
+
+    <Pl, Gen|Loc,_> => afs.pgen ;
+    <Pl, Ins,_>     => afs.pins
+    }
+    
     } ;
 
 -- hard declension
@@ -403,16 +443,53 @@ oper
     in {
       msnom                              = mlad + "ý" ;
       fsnom                              = mlad + "á" ;
-      nsnom,fsgen,fsdat,fsins,fpnom,pacc = mlad + "é" ;
+      nsnom,fsgen,fsdat,fpnom            = mlad + "é" ;
       msgen                              = mlad + "ého" ;
       msdat                              = mlad + "ému" ;
       fsacc,fsins                        = mlad + "ou" ;
       msloc                              = mlad + "ém" ;
       msins,pdat                         = mlad + "ým" ;
-      mpnom                              = mlad + "í" ;
+      mpnom                              = addAdjI mlad ;
       pgen                               = mlad + "ých" ;
       pins                               = mlad + "ými" ;
       } ;
 
+-- soft declension
+
+  jarniAdjForms : Str -> AdjForms = \jarni ->
+    {
+      msnom,fsnom,nsnom,
+      fsgen,fsdat,fsacc,fsins,
+      mpnom,fpnom                        = jarni ;
+      msgen                              = jarni + "ho" ;
+      msdat                              = jarni + "mu" ;
+      msloc,msins                        = jarni + "m" ;
+      pgen                               = jarni + "ch" ;
+      pins                               = jarni + "mi" ;
+      } ;
+
+-- masculine possession: the same endings as in feminine
+
+  otcuvAdjForms : Str -> AdjForms = \otcuv ->
+    let otcov = Predef.tk 2 otcuv + "ov"
+    in
+    matcinAdjForms otcov ** {msnom = otcuv} ;
+
+-- feminine possession
+
+  matcinAdjForms : Str -> AdjForms = \matcin ->
+     {
+      msnom                              = matcin ;
+      fsnom,msgen                        = matcin + "a" ;
+      nsnom                              = matcin + "o" ;
+      fsgen,fpnom                        = matcin + "y" ;
+      msdat,fsacc                        = matcin + "u" ;
+      fsdat,msloc                        = matcin + "ě" ;
+      msins                              = matcin + "ým" ;
+      fsins                              = matcin + "ou" ;
+      mpnom                              = matcin + "i" ;
+      pgen                               = matcin + "ých" ;
+      pins                               = matcin + "ými" ;
+      } ;
 
 }
